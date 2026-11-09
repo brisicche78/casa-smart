@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101827">
+  <meta name="description" content="Comandi rapidi per i dispositivi Shelly di casa">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <title>Casa Smart</title>
+  <style>
+    :root{color-scheme:dark;--bg:#101827;--panel:#1b293b;--muted:#9aabc0;--line:#2b3b50;--accent:#69a7ff;--green:#35c58a;--red:#f07878}
+    *{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#14243a,var(--bg) 55%);color:#f5f7fb;font-family:system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+    main{width:min(100% - 32px,520px);margin:0 auto;padding:34px 0 48px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px}
+    h1{font-size:27px;margin:0;letter-spacing:-.7px}.sub{color:var(--muted);font-size:13px;margin-top:5px}
+    .dot{width:9px;height:9px;border-radius:50%;background:#66758a;display:inline-block;margin-right:7px}.dot.ok{background:var(--green)}.dot.bad{background:var(--red)}
+    .card{background:rgba(27,41,59,.94);border:1px solid var(--line);border-radius:20px;padding:20px;margin:14px 0;box-shadow:0 12px 35px #0002}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:14px}
+    h2{font-size:17px;margin:0 0 5px}.hint{font-size:13px;color:var(--muted)}
+    button{font:inherit;border:0;cursor:pointer;border-radius:14px;font-weight:650;transition:transform .12s,opacity .12s}
+    button:active{transform:scale(.98)}button:disabled{opacity:.45;cursor:wait}
+    .toggle{min-width:112px;padding:13px 17px;background:#31445e;color:#fff}
+    .toggle.on{background:#176c50}.gate{width:100%;padding:19px;background:linear-gradient(110deg,#287bd8,#4b9bff);color:white;font-size:18px;margin-top:16px}
+    .state{font-size:12px;color:var(--muted);margin-top:12px}.state strong{color:#e9eef7}
+    .login{max-width:420px;margin:10vh auto}.field{width:100%;padding:14px 15px;border:1px solid var(--line);border-radius:12px;background:#101b2a;color:white;font:inherit;margin:12px 0}
+    .primary{width:100%;padding:14px;background:var(--accent);color:#071426}.error{color:#ff9999;font-size:13px;min-height:20px;margin-top:10px}
+    .hidden{display:none!important}footer{text-align:center;color:#73849b;font-size:12px;margin-top:26px}
+  </style>
+</head>
+<body>
+<main>
+  <section id="loginView" class="login card">
+    <h1>Casa Smart</h1><p class="sub">Accesso protetto ai tuoi dispositivi</p>
+    <form id="loginForm">
+      <input id="password" class="field" type="password" placeholder="Password dell'app" autocomplete="current-password" required>
+      <button class="primary" type="submit">Entra</button>
+      <div id="loginError" class="error"></div>
+    </form>
+  </section>
+  <section id="appView" class="hidden">
+    <header><div><h1>Casa Smart</h1><div class="sub">Controllo dispositivi</div></div><div class="hint"><span id="cloudDot" class="dot"></span><span id="cloudText">Connessione…</span></div></header>
+    <article class="card">
+      <div class="row"><div><h2>Cancello</h2><div class="hint">Comando a impulso</div></div></div>
+      <button id="gateBtn" class="gate">↗ &nbsp; Apri cancello</button>
+      <div class="state" id="gateState">Stato: in attesa</div>
+    </article>
+    <article class="card">
+      <div class="row"><div><h2>Faretti piazzale</h2><div class="hint" id="yardState">Stato non ancora letto</div></div><button id="yardBtn" class="toggle" disabled>…</button></div>
+    </article>
+    <article class="card">
+      <div class="row"><div><h2>Lampioncino scale</h2><div class="hint" id="stairsState">Stato non ancora letto</div></div><button id="stairsBtn" class="toggle" disabled>…</button></div>
+    </article>
+    <div class="row"><div class="hint" id="updated">In attesa del primo aggiornamento</div><button id="refreshBtn" class="toggle">Aggiorna</button></div>
+    <footer>Casa Smart · Shelly Cloud</footer>
+  </section>
+</main>
+<script>
+const API = "https://casa-smart-api.brisicche78.workers.dev";
+const IDS = { gate:"441793cd4e78", stairs:"a8032abb2468", yard:"ccba97d87ba0" };
+let token = sessionStorage.getItem("casaSmartToken") || "";
+let busy = false;
+const $ = id => document.getElementById(id);
+
+function showApp(){
+  $("loginView").classList.toggle("hidden",!!token);
+  $("appView").classList.toggle("hidden",!token);
+}
+async function api(path, body, authenticated=true){
+  const headers={"Content-Type":"application/json"};
+  if(authenticated && token) headers.Authorization="Bearer "+token;
+  const res=await fetch(API+path,{method:"POST",headers,body:JSON.stringify(body||{})});
+  const data=await res.json().catch(()=>({error:"Risposta non valida dal server"}));
+  if(!res.ok) throw new Error(data.error || "Errore HTTP "+res.status);
+  return data;
+}
+$("loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();$("loginError").textContent="Accesso in corso…";
+  try{const r=await api("/login",{password:$("password").value},false);token=r.token;sessionStorage.setItem("casaSmartToken",token);$("password").value="";$("loginError").textContent="";showApp();await refresh();}
+  catch(err){$("loginError").textContent=err.message;}
+});
+function outputOf(device){
+  const s=device.status||{};
+  const sw=s["switch:0"]||s.switch||s;
+  if(typeof sw.output==="boolean") return sw.output;
+  if(typeof sw.on==="boolean") return sw.on;
+  if(typeof s.output==="boolean") return s.output;
+  return null;
+}
+function setToggle(id,on,online){
+  const btn=$(id+"Btn"), label=$(id+"State");
+  btn.disabled=!online;btn.textContent=on?"SPEGNI":"ACCENDI";btn.classList.toggle("on",!!on);
+  label.textContent=online?(on?"Acceso":"Spento"):"Non raggiungibile";
+}
+async function refresh(){
+  if(busy)return;busy=true;$("refreshBtn").disabled=true;
+  try{
+    const data=await api("/status",{});
+    const devices=Array.isArray(data)?data:(data.devices||data.data||[]);
+    const byId=Object.fromEntries(devices.map(d=>[d.id,d]));
+    const yard=byId[IDS.yard], stairs=byId[IDS.stairs], gate=byId[IDS.gate];
+    const online=d=>!!d && (d.online===1 || d.online===true);
+    setToggle("yard",yard?outputOf(yard):false,online(yard));
+    setToggle("stairs",stairs?outputOf(stairs):false,online(stairs));
+    $("gateState").textContent=online(gate)?"Dispositivo online":"Dispositivo non raggiungibile";
+    $("cloudDot").className="dot ok";$("cloudText").textContent="Connesso";
+    $("updated").textContent="Aggiornato alle "+new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  }catch(err){
+    $("cloudDot").className="dot bad";$("cloudText").textContent="Non connesso";
+    $("updated").textContent=err.message;
+    if(/Sessione scaduta|non valida/i.test(err.message)){token="";sessionStorage.removeItem("casaSmartToken");showApp();}
+  }finally{busy=false;$("refreshBtn").disabled=false;}
+}
+async function command(id,on,pulse=false){
+  if(busy)return;busy=true;
+  const buttons=["gateBtn","yardBtn","stairsBtn","refreshBtn"];buttons.forEach(x=>$(x).disabled=true);
+  try{
+    await api("/switch",{id,on,pulse});
+    $("gateState").textContent=pulse?"Impulso inviato":"Comando inviato";
+    // Shelly Cloud limits calls to one request per second.
+    await new Promise(r=>setTimeout(r,1300));
+    await refresh();
+  }catch(err){$("updated").textContent=err.message;}
+  finally{busy=false;buttons.forEach(x=>$(x).disabled=false);}
+}
+$("gateBtn").addEventListener("click",()=>command(IDS.gate,true,true));
+$("yardBtn").addEventListener("click",()=>command(IDS.yard,!$("yardBtn").classList.contains("on")));
+$("stairsBtn").addEventListener("click",()=>command(IDS.stairs,!$("stairsBtn").classList.contains("on")));
+$("refreshBtn").addEventListener("click",refresh);
+showApp();
+if(token){showApp();refresh();}
+</script>
+</body>
+</html>
