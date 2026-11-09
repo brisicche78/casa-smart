@@ -1,0 +1,11 @@
+{
+  "name": "Casa Smart",
+  "short_name": "Casa Smart",
+  "description": "Comandi rapidi per i dispositivi Shelly di casa",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101827",
+  "theme_color": "#101827",
+  "lang": "it"
+}
