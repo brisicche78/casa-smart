@@ -1,11 +1,11 @@
 {
-  "name": "Casa Smart",
-  "short_name": "Casa Smart",
-  "description": "Comandi rapidi per i dispositivi Shelly di casa",
+  "name": "Casa Santini",
+  "short_name": "Casa Santini",
+  "description": "Interfaccia domotica Casa Santini",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#101827",
-  "theme_color": "#101827",
+  "background_color": "#050914",
+  "theme_color": "#050914",
   "lang": "it"
 }
