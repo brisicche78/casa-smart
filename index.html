@@ -3,55 +3,80 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#101827">
+  <meta name="theme-color" content="#090f1c">
   <meta name="description" content="Comandi rapidi per i dispositivi Shelly di casa">
   <link rel="manifest" href="./manifest.webmanifest">
   <title>Casa Smart</title>
   <style>
-    :root{color-scheme:dark;--bg:#101827;--panel:#1b293b;--muted:#9aabc0;--line:#2b3b50;--accent:#69a7ff;--green:#35c58a;--red:#f07878}
-    *{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#14243a,var(--bg) 55%);color:#f5f7fb;font-family:system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
-    main{width:min(100% - 32px,520px);margin:0 auto;padding:34px 0 48px}
-    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px}
-    h1{font-size:27px;margin:0;letter-spacing:-.7px}.sub{color:var(--muted);font-size:13px;margin-top:5px}
-    .dot{width:9px;height:9px;border-radius:50%;background:#66758a;display:inline-block;margin-right:7px}.dot.ok{background:var(--green)}.dot.bad{background:var(--red)}
-    .card{background:rgba(27,41,59,.94);border:1px solid var(--line);border-radius:20px;padding:20px;margin:14px 0;box-shadow:0 12px 35px #0002}
-    .row{display:flex;align-items:center;justify-content:space-between;gap:14px}
-    h2{font-size:17px;margin:0 0 5px}.hint{font-size:13px;color:var(--muted)}
-    button{font:inherit;border:0;cursor:pointer;border-radius:14px;font-weight:650;transition:transform .12s,opacity .12s}
-    button:active{transform:scale(.98)}button:disabled{opacity:.45;cursor:wait}
-    .toggle{min-width:112px;padding:13px 17px;background:#31445e;color:#fff}
-    .toggle.on{background:#176c50}.gate{width:100%;padding:19px;background:linear-gradient(110deg,#287bd8,#4b9bff);color:white;font-size:18px;margin-top:16px}
-    .state{font-size:12px;color:var(--muted);margin-top:12px}.state strong{color:#e9eef7}
-    .login{max-width:420px;margin:10vh auto}.field{width:100%;padding:14px 15px;border:1px solid var(--line);border-radius:12px;background:#101b2a;color:white;font:inherit;margin:12px 0}
-    .primary{width:100%;padding:14px;background:var(--accent);color:#071426}.error{color:#ff9999;font-size:13px;min-height:20px;margin-top:10px}
-    .hidden{display:none!important}footer{text-align:center;color:#73849b;font-size:12px;margin-top:26px}
+    :root{color-scheme:dark;--bg:#090f1c;--panel:#121d2e;--panel2:#17253a;--muted:#91a2b9;--line:#263750;--blue:#63a9ff;--green:#36d69a;--red:#ff777d;--gold:#f2c879}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -15%,#203b60 0%,#101b2d 38%,var(--bg) 75%);color:#f5f8ff;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+    main{width:min(100% - 30px,500px);margin:0 auto;padding:30px 0 calc(35px + env(safe-area-inset-bottom))}
+    header{display:flex;align-items:center;justify-content:space-between;margin:8px 2px 27px}
+    .brand{display:flex;align-items:center;gap:12px}.brandmark{width:45px;height:45px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(145deg,#2b78c9,#17416f);box-shadow:0 8px 24px #1678d544;font-size:23px}
+    h1{font-size:25px;letter-spacing:-.8px;margin:0;font-weight:750}.sub{font-size:12px;color:var(--muted);margin-top:4px;letter-spacing:.2px}
+    .connection{display:flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid var(--line);border-radius:30px;background:#101b2bc9;color:#b7c5d8;font-size:11px;white-space:nowrap}
+    .dot{width:7px;height:7px;border-radius:50%;background:#718096;box-shadow:0 0 0 3px #71809622}.dot.ok{background:var(--green);box-shadow:0 0 0 3px #36d69a22}.dot.bad{background:var(--red);box-shadow:0 0 0 3px #ff777d22}
+    .intro{font-size:12px;color:#8194ad;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin:0 3px 12px}
+    .card{position:relative;overflow:hidden;background:linear-gradient(145deg,rgba(26,42,64,.97),rgba(16,27,44,.98));border:1px solid #2a3d58;border-radius:23px;padding:19px;margin:12px 0;box-shadow:0 14px 35px #0003}
+    .card:after{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(180deg,#4f9df3,#244e7c);opacity:.85}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:13px}
+    .device{display:flex;align-items:center;gap:14px;min-width:0}
+    .device-icon{width:53px;height:53px;flex:0 0 53px;border-radius:17px;display:grid;place-items:center;background:linear-gradient(145deg,#243e5d,#172b44);border:1px solid #365273;color:#a9d2ff;font-size:25px}
+    h2{font-size:16px;margin:0 0 5px;font-weight:700;letter-spacing:-.2px}.hint{font-size:12px;color:var(--muted)}
+    .state{display:flex;align-items:center;gap:7px;font-size:12px;color:#aab9cc;margin:15px 0 0 67px}
+    .state:before{content:"";width:6px;height:6px;border-radius:50%;background:#7b8da5}
+    .state.active:before{background:var(--green);box-shadow:0 0 9px #36d69a99}
+    button{font:inherit;border:0;cursor:pointer;border-radius:14px;font-weight:750;transition:transform .13s,filter .13s,opacity .13s}
+    button:active{transform:scale(.97)}button:disabled{opacity:.42;cursor:wait}
+    .toggle{min-width:104px;padding:12px 14px;background:#293b54;border:1px solid #3a506e;color:#dceaff;font-size:11px;letter-spacing:.5px}
+    .toggle.on{background:linear-gradient(135deg,#146c51,#10533f);border-color:#258765;color:#baffdf;box-shadow:0 5px 18px #16a36b20}
+    .gate-card{background:linear-gradient(145deg,#1b3452,#111f33);border-color:#355477}
+    .gate-card:after{background:linear-gradient(180deg,#72bdff,#397bd0)}
+    .gate-card .device-icon{background:linear-gradient(145deg,#2869a8,#19436f);border-color:#4b83b8;color:#e0f1ff}
+    .gate{width:100%;padding:16px 18px;margin-top:17px;background:linear-gradient(100deg,#287ed2,#4b9fff);color:white;font-size:15px;letter-spacing:.1px;box-shadow:0 8px 22px #287ed244}
+    .gate:active{filter:brightness(1.12)}
+    .tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:20px 2px 0}
+    .updated{font-size:11px;color:#71839c;line-height:1.4}
+    .refresh{padding:11px 15px;border-radius:12px;background:#17273c;border:1px solid #30445f;color:#c6d7ec;font-size:12px}
+    footer{text-align:center;color:#53657d;font-size:11px;margin-top:25px;letter-spacing:.5px}
+    .login{max-width:420px;margin:12vh auto}.login .brand{margin-bottom:8px}.field{width:100%;padding:15px;border:1px solid var(--line);border-radius:13px;background:#0d1726;color:white;font:inherit;margin:17px 0 12px;outline:none}.field:focus{border-color:#579be5;box-shadow:0 0 0 3px #579be522}
+    .primary{width:100%;padding:15px;background:linear-gradient(100deg,#287ed2,#4b9fff);color:white}.error{color:#ff9999;font-size:13px;min-height:20px;margin-top:10px}
+    .hidden{display:none!important}
+    @media(max-width:380px){main{width:min(100% - 22px,500px);padding-top:20px}.card{padding:15px}.device-icon{width:47px;height:47px;flex-basis:47px}.toggle{min-width:91px;padding:11px 10px}.state{margin-left:61px}}
   </style>
 </head>
 <body>
 <main>
   <section id="loginView" class="login card">
-    <h1>Casa Smart</h1><p class="sub">Accesso protetto ai tuoi dispositivi</p>
+    <div class="brand"><div class="brandmark">⌂</div><div><h1>Casa Smart</h1><p class="sub">La tua casa, sotto controllo</p></div></div>
     <form id="loginForm">
       <input id="password" class="field" type="password" placeholder="Password dell'app" autocomplete="current-password" required>
-      <button class="primary" type="submit">Entra</button>
+      <button class="primary" type="submit">Accedi</button>
       <div id="loginError" class="error"></div>
     </form>
   </section>
   <section id="appView" class="hidden">
-    <header><div><h1>Casa Smart</h1><div class="sub">Controllo dispositivi</div></div><div class="hint"><span id="cloudDot" class="dot"></span><span id="cloudText">Connessione…</span></div></header>
-    <article class="card">
-      <div class="row"><div><h2>Cancello</h2><div class="hint">Comando a impulso</div></div></div>
-      <button id="gateBtn" class="gate">↗ &nbsp; Apri cancello</button>
-      <div class="state" id="gateState">Stato: in attesa</div>
+    <header>
+      <div class="brand"><div class="brandmark">⌂</div><div><h1>Casa Smart</h1><div class="sub">La tua casa, sotto controllo</div></div></div>
+      <div class="connection"><span id="cloudDot" class="dot"></span><span id="cloudText">Connessione…</span></div>
+    </header>
+    <p class="intro">Accessi e illuminazione</p>
+    <article class="card gate-card">
+      <div class="row"><div class="device"><div class="device-icon">⌑</div><div><h2>Cancello</h2><div class="hint">Apertura automatica a impulso</div></div></div></div>
+      <button id="gateBtn" class="gate">↗ &nbsp; APRI CANCELLO</button>
+      <div class="state" id="gateState">In attesa</div>
     </article>
     <article class="card">
-      <div class="row"><div><h2>Faretti piazzale</h2><div class="hint" id="yardState">Stato non ancora letto</div></div><button id="yardBtn" class="toggle" disabled>…</button></div>
+      <div class="row"><div class="device"><div class="device-icon">✦</div><div><h2>Faretti piazzale</h2><div class="hint">Illuminazione esterna</div></div></div><button id="yardBtn" class="toggle" disabled>…</button></div>
+      <div class="state" id="yardState">Stato non ancora letto</div>
     </article>
     <article class="card">
-      <div class="row"><div><h2>Lampioncino scale</h2><div class="hint" id="stairsState">Stato non ancora letto</div></div><button id="stairsBtn" class="toggle" disabled>…</button></div>
+      <div class="row"><div class="device"><div class="device-icon">☼</div><div><h2>Lampioncino scale</h2><div class="hint">Illuminazione ingresso</div></div></div><button id="stairsBtn" class="toggle" disabled>…</button></div>
+      <div class="state" id="stairsState">Stato non ancora letto</div>
     </article>
-    <div class="row"><div class="hint" id="updated">In attesa del primo aggiornamento</div><button id="refreshBtn" class="toggle">Aggiorna</button></div>
-    <footer>Casa Smart · Shelly Cloud</footer>
+    <div class="tools"><div class="updated" id="updated">In attesa del primo aggiornamento</div><button id="refreshBtn" class="refresh">↻ &nbsp; Aggiorna</button></div>
+    <footer>CASA SMART &nbsp;·&nbsp; SHELLY CLOUD</footer>
   </section>
 </main>
 <script>
@@ -60,18 +85,12 @@ const IDS = { gate:"441793cd4e78", stairs:"a8032abb2468", yard:"ccba97d87ba0" };
 let token = sessionStorage.getItem("casaSmartToken") || "";
 let busy = false;
 const $ = id => document.getElementById(id);
-
-function showApp(){
-  $("loginView").classList.toggle("hidden",!!token);
-  $("appView").classList.toggle("hidden",!token);
-}
-async function api(path, body, authenticated=true){
-  const headers={"Content-Type":"application/json"};
-  if(authenticated && token) headers.Authorization="Bearer "+token;
+function showApp(){ $("loginView").classList.toggle("hidden",!!token); $("appView").classList.toggle("hidden",!token); }
+async function api(path,body,authenticated=true){
+  const headers={"Content-Type":"application/json"};if(authenticated&&token)headers.Authorization="Bearer "+token;
   const res=await fetch(API+path,{method:"POST",headers,body:JSON.stringify(body||{})});
   const data=await res.json().catch(()=>({error:"Risposta non valida dal server"}));
-  if(!res.ok) throw new Error(data.error || "Errore HTTP "+res.status);
-  return data;
+  if(!res.ok)throw new Error(data.error||"Errore HTTP "+res.status);return data;
 }
 $("loginForm").addEventListener("submit",async e=>{
   e.preventDefault();$("loginError").textContent="Accesso in corso…";
@@ -79,56 +98,39 @@ $("loginForm").addEventListener("submit",async e=>{
   catch(err){$("loginError").textContent=err.message;}
 });
 function outputOf(device){
-  const s=device.status||{};
-  const sw=s["switch:0"]||s.switch||s;
-  if(typeof sw.output==="boolean") return sw.output;
-  if(typeof sw.on==="boolean") return sw.on;
-  if(typeof s.output==="boolean") return s.output;
-  return null;
+  const s=device.status||{};const sw=s["switch:0"]||s.switch||s;
+  if(typeof sw.output==="boolean")return sw.output;if(typeof sw.on==="boolean")return sw.on;if(typeof s.output==="boolean")return s.output;return null;
 }
 function setToggle(id,on,online){
-  const btn=$(id+"Btn"), label=$(id+"State");
-  btn.disabled=!online;btn.textContent=on?"SPEGNI":"ACCENDI";btn.classList.toggle("on",!!on);
-  label.textContent=online?(on?"Acceso":"Spento"):"Non raggiungibile";
+  const btn=$(id+"Btn"),label=$(id+"State");btn.disabled=!online;btn.textContent=on?"SPEGNI":"ACCENDI";btn.classList.toggle("on",!!on);
+  label.textContent=online?(on?"Acceso":"Spento"):"Non raggiungibile";label.classList.toggle("active",online&&!!on);
 }
 async function refresh(){
   if(busy)return;busy=true;$("refreshBtn").disabled=true;
   try{
-    const data=await api("/status",{});
-    const devices=Array.isArray(data)?data:(data.devices||data.data||[]);
-    const byId=Object.fromEntries(devices.map(d=>[d.id,d]));
-    const yard=byId[IDS.yard], stairs=byId[IDS.stairs], gate=byId[IDS.gate];
-    const online=d=>!!d && (d.online===1 || d.online===true);
-    setToggle("yard",yard?outputOf(yard):false,online(yard));
-    setToggle("stairs",stairs?outputOf(stairs):false,online(stairs));
-    $("gateState").textContent=online(gate)?"Dispositivo online":"Dispositivo non raggiungibile";
+    const data=await api("/status",{});const devices=Array.isArray(data)?data:(data.devices||data.data||[]);const byId=Object.fromEntries(devices.map(d=>[d.id,d]));
+    const yard=byId[IDS.yard],stairs=byId[IDS.stairs],gate=byId[IDS.gate];const online=d=>!!d&&(d.online===1||d.online===true);
+    setToggle("yard",yard?outputOf(yard):false,online(yard));setToggle("stairs",stairs?outputOf(stairs):false,online(stairs));
+    $("gateState").textContent=online(gate)?"Dispositivo online":"Dispositivo non raggiungibile";$("gateState").classList.toggle("active",online(gate));
     $("cloudDot").className="dot ok";$("cloudText").textContent="Connesso";
     $("updated").textContent="Aggiornato alle "+new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
   }catch(err){
-    $("cloudDot").className="dot bad";$("cloudText").textContent="Non connesso";
-    $("updated").textContent=err.message;
+    $("cloudDot").className="dot bad";$("cloudText").textContent="Non connesso";$("updated").textContent=err.message;
     if(/Sessione scaduta|non valida/i.test(err.message)){token="";sessionStorage.removeItem("casaSmartToken");showApp();}
   }finally{busy=false;$("refreshBtn").disabled=false;}
 }
 async function command(id,on,pulse=false){
-  if(busy)return;busy=true;
-  const buttons=["gateBtn","yardBtn","stairsBtn","refreshBtn"];buttons.forEach(x=>$(x).disabled=true);
-  try{
-    await api("/switch",{id,on,pulse});
-    $("gateState").textContent=pulse?"Impulso inviato":"Comando inviato";
-    // Shelly Cloud limits calls to one request per second.
-    await new Promise(r=>setTimeout(r,1300));
-  }catch(err){$("updated").textContent=err.message;}
-  finally{busy=false;buttons.forEach(x=>$(x).disabled=false);}
-  if(token) await refresh();
+  if(busy)return;busy=true;["gateBtn","yardBtn","stairsBtn","refreshBtn"].forEach(x=>$(x).disabled=true);
+  try{await api("/switch",{id,on,pulse});$("gateState").textContent=pulse?"Impulso inviato":"Comando inviato";await new Promise(r=>setTimeout(r,1300));}
+  catch(err){$("updated").textContent=err.message;}
+  finally{busy=false;["gateBtn","yardBtn","stairsBtn","refreshBtn"].forEach(x=>$(x).disabled=false);}
+  if(token)await refresh();
 }
 $("gateBtn").addEventListener("click",()=>command(IDS.gate,true,true));
 $("yardBtn").addEventListener("click",()=>command(IDS.yard,!$("yardBtn").classList.contains("on")));
 $("stairsBtn").addEventListener("click",()=>command(IDS.stairs,!$("stairsBtn").classList.contains("on")));
 $("refreshBtn").addEventListener("click",refresh);
-showApp();
-if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});
-if(token){showApp();refresh();}
+showApp();if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});if(token){showApp();refresh();}
 </script>
 </body>
 </html>
