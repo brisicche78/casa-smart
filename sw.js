@@ -1,4 +1,4 @@
-const CACHE = "casa-smart-v2";
+const CACHE = "casa-santini-v3";
 const FILES = ["./", "./index.html", "./manifest.webmanifest"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)));
