@@ -8,75 +8,82 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <title>Casa Smart</title>
   <style>
-    :root{color-scheme:dark;--bg:#090f1c;--panel:#121d2e;--panel2:#17253a;--muted:#91a2b9;--line:#263750;--blue:#63a9ff;--green:#36d69a;--red:#ff777d;--gold:#f2c879}
-    *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -15%,#203b60 0%,#101b2d 38%,var(--bg) 75%);color:#f5f8ff;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
-    main{width:min(100% - 30px,500px);margin:0 auto;padding:30px 0 calc(35px + env(safe-area-inset-bottom))}
-    header{display:flex;align-items:center;justify-content:space-between;margin:8px 2px 27px}
-    .brand{display:flex;align-items:center;gap:12px}.brandmark{width:45px;height:45px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(145deg,#2b78c9,#17416f);box-shadow:0 8px 24px #1678d544;font-size:23px}
-    h1{font-size:25px;letter-spacing:-.8px;margin:0;font-weight:750}.sub{font-size:12px;color:var(--muted);margin-top:4px;letter-spacing:.2px}
-    .connection{display:flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid var(--line);border-radius:30px;background:#101b2bc9;color:#b7c5d8;font-size:11px;white-space:nowrap}
-    .dot{width:7px;height:7px;border-radius:50%;background:#718096;box-shadow:0 0 0 3px #71809622}.dot.ok{background:var(--green);box-shadow:0 0 0 3px #36d69a22}.dot.bad{background:var(--red);box-shadow:0 0 0 3px #ff777d22}
-    .intro{font-size:12px;color:#8194ad;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin:0 3px 12px}
-    .card{position:relative;overflow:hidden;background:linear-gradient(145deg,rgba(26,42,64,.97),rgba(16,27,44,.98));border:1px solid #2a3d58;border-radius:23px;padding:19px;margin:12px 0;box-shadow:0 14px 35px #0003}
-    .card:after{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(180deg,#4f9df3,#244e7c);opacity:.85}
-    .row{display:flex;align-items:center;justify-content:space-between;gap:13px}
-    .device{display:flex;align-items:center;gap:14px;min-width:0}
-    .device-icon{width:53px;height:53px;flex:0 0 53px;border-radius:17px;display:grid;place-items:center;background:linear-gradient(145deg,#243e5d,#172b44);border:1px solid #365273;color:#a9d2ff;font-size:25px}
-    h2{font-size:16px;margin:0 0 5px;font-weight:700;letter-spacing:-.2px}.hint{font-size:12px;color:var(--muted)}
-    .state{display:flex;align-items:center;gap:7px;font-size:12px;color:#aab9cc;margin:15px 0 0 67px}
-    .state:before{content:"";width:6px;height:6px;border-radius:50%;background:#7b8da5}
-    .state.active:before{background:var(--green);box-shadow:0 0 9px #36d69a99}
-    button{font:inherit;border:0;cursor:pointer;border-radius:14px;font-weight:750;transition:transform .13s,filter .13s,opacity .13s}
-    button:active{transform:scale(.97)}button:disabled{opacity:.42;cursor:wait}
-    .toggle{min-width:104px;padding:12px 14px;background:#293b54;border:1px solid #3a506e;color:#dceaff;font-size:11px;letter-spacing:.5px}
-    .toggle.on{background:linear-gradient(135deg,#146c51,#10533f);border-color:#258765;color:#baffdf;box-shadow:0 5px 18px #16a36b20}
-    .gate-card{background:linear-gradient(145deg,#1b3452,#111f33);border-color:#355477}
-    .gate-card:after{background:linear-gradient(180deg,#72bdff,#397bd0)}
-    .gate-card .device-icon{background:linear-gradient(145deg,#2869a8,#19436f);border-color:#4b83b8;color:#e0f1ff}
-    .gate{width:100%;padding:16px 18px;margin-top:17px;background:linear-gradient(100deg,#287ed2,#4b9fff);color:white;font-size:15px;letter-spacing:.1px;box-shadow:0 8px 22px #287ed244}
-    .gate:active{filter:brightness(1.12)}
-    .tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:20px 2px 0}
-    .updated{font-size:11px;color:#71839c;line-height:1.4}
-    .refresh{padding:11px 15px;border-radius:12px;background:#17273c;border:1px solid #30445f;color:#c6d7ec;font-size:12px}
-    footer{text-align:center;color:#53657d;font-size:11px;margin-top:25px;letter-spacing:.5px}
-    .login{max-width:420px;margin:12vh auto}.login .brand{margin-bottom:8px}.field{width:100%;padding:15px;border:1px solid var(--line);border-radius:13px;background:#0d1726;color:white;font:inherit;margin:17px 0 12px;outline:none}.field:focus{border-color:#579be5;box-shadow:0 0 0 3px #579be522}
-    .primary{width:100%;padding:15px;background:linear-gradient(100deg,#287ed2,#4b9fff);color:white}.error{color:#ff9999;font-size:13px;min-height:20px;margin-top:10px}
-    .hidden{display:none!important}
-    @media(max-width:380px){main{width:min(100% - 22px,500px);padding-top:20px}.card{padding:15px}.device-icon{width:47px;height:47px;flex-basis:47px}.toggle{min-width:91px;padding:11px 10px}.state{margin-left:61px}}
-  </style>
+:root{color-scheme:dark;--bg:#050914;--panel:#0c1425;--panel2:#111f35;--muted:#8396b5;--line:#203452;--cyan:#54e7ff;--blue:#4d8dff;--green:#48f0bd;--red:#ff668c;--amber:#ffd36a}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -12%,#19365d 0%,#0b1427 35%,#050914 74%);color:#eef7ff;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;background-image:linear-gradient(#54749a22 1px,transparent 1px),linear-gradient(90deg,#54749a22 1px,transparent 1px);background-size:38px 38px;mask-image:linear-gradient(to bottom,black,transparent 75%)}
+main{position:relative;width:min(100% - 30px,520px);margin:0 auto;padding:30px 0 calc(38px + env(safe-area-inset-bottom))}
+.brand{display:flex;align-items:center;gap:13px;min-width:0}
+.brandmark{width:48px;height:48px;flex:0 0 48px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(145deg,#102f4d,#0b1b30);border:1px solid #28658a;box-shadow:inset 0 0 20px #29d9ff19,0 0 26px #087eb52b;color:var(--cyan)}
+.brandmark svg{width:29px;height:29px}
+h1{font-size:24px;letter-spacing:2px;margin:0;font-weight:850}.sub{font-size:10px;color:#7f9bbd;margin-top:5px;letter-spacing:2px;text-transform:uppercase}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:7px 2px 34px}
+.connection{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #25405d;border-radius:30px;background:#0a1525d9;color:#a9c0da;font-size:10px;letter-spacing:.7px;white-space:nowrap;text-transform:uppercase}
+.dot{width:7px;height:7px;border-radius:50%;background:#718096;box-shadow:0 0 0 3px #71809622}.dot.ok{background:var(--green);box-shadow:0 0 10px #48f0bd,0 0 0 4px #48f0bd20}.dot.bad{background:var(--red);box-shadow:0 0 0 3px #ff668c22}
+.intro{display:flex;align-items:center;gap:10px;font-size:10px;color:#7894b5;letter-spacing:2.3px;text-transform:uppercase;font-weight:800;margin:0 4px 14px}.intro:before{content:"";width:19px;height:1px;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.card{position:relative;overflow:hidden;background:linear-gradient(145deg,#101e33f5,#091323f7);border:1px solid #203955;border-radius:24px;padding:20px;margin:13px 0;box-shadow:0 16px 42px #0005,inset 0 1px #ffffff08}
+.card:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 0% 0%,#38cfff0c,transparent 58%)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.device{display:flex;align-items:center;gap:15px;min-width:0}
+.device-icon{position:relative;width:62px;height:62px;flex:0 0 62px;border-radius:19px;display:grid;place-items:center;background:linear-gradient(145deg,#142d49,#0a192c);border:1px solid #2a5273;color:#75dfff;box-shadow:inset 0 0 20px #35caff10,0 0 18px #1688c314}
+.device-icon svg{width:39px;height:39px;overflow:visible;filter:drop-shadow(0 0 5px currentColor)}
+h2{font-size:16px;margin:0 0 6px;font-weight:750;letter-spacing:.1px}.hint{font-size:11px;color:#8399b5;letter-spacing:.15px}
+.state{display:flex;align-items:center;gap:8px;font-size:10px;color:#8298b5;margin:17px 0 0 77px;letter-spacing:1px;text-transform:uppercase}
+.state:before{content:"";width:6px;height:6px;border-radius:50%;background:#62748d}
+.state.active{color:#8fffd7}.state.active:before{background:var(--green);box-shadow:0 0 9px var(--green)}
+button{font:inherit;border:0;cursor:pointer;border-radius:14px;font-weight:800;transition:transform .15s,filter .15s,opacity .15s,box-shadow .2s}
+button:active{transform:scale(.97)}button:disabled{opacity:.42;cursor:wait}
+.toggle{min-width:105px;padding:12px 14px;background:#14243a;border:1px solid #2b4563;color:#c3d8ee;font-size:10px;letter-spacing:1px}
+.toggle.on{background:linear-gradient(135deg,#075a54,#0b3d43);border-color:#22b99c;color:#aaffea;box-shadow:0 0 20px #13d8b328,inset 0 0 15px #13d8b314}
+.card:has(.toggle.on) .device-icon{color:#8dffe0;border-color:#278b80;box-shadow:inset 0 0 22px #28e4c52a,0 0 22px #16c8ad2a}
+.gate-card{background:linear-gradient(140deg,#112b48,#0a172a);border-color:#285477}
+.gate-card:after{content:"GATE CONTROL / 01";position:absolute;right:18px;top:17px;color:#54799b;font-size:8px;letter-spacing:1.4px;font-weight:800}
+.gate-card .device-icon{background:linear-gradient(145deg,#12456a,#10233c);border-color:#2c80a9;color:#71eaff;box-shadow:0 0 25px #19b9e51a,inset 0 0 18px #25c9ff19}
+.gate{width:100%;padding:16px 18px;margin-top:18px;background:linear-gradient(100deg,#087cae,#2468d5 65%,#4b70f4);color:#fff;font-size:12px;letter-spacing:1.5px;box-shadow:0 8px 26px #126bc54d,inset 0 1px #ffffff35}
+.gate:active{filter:brightness(1.18)}
+.tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 2px 0}
+.updated{font-size:10px;color:#7085a1;line-height:1.5;max-width:65%}
+.refresh{padding:11px 15px;border-radius:12px;background:#101f34;border:1px solid #29425e;color:#b9d3ed;font-size:10px;letter-spacing:.8px}
+footer{text-align:center;color:#536b88;font-size:9px;margin-top:28px;letter-spacing:2px}
+.login{max-width:420px;margin:12vh auto;padding:25px}.login .brand{margin-bottom:25px}.field{width:100%;padding:15px;border:1px solid #29425e;border-radius:13px;background:#081323;color:white;font:inherit;margin:17px 0 12px;outline:none}.field:focus{border-color:#4acff0;box-shadow:0 0 0 3px #579be522}
+.primary{width:100%;padding:15px;background:linear-gradient(100deg,#087cae,#426ff0);color:white;letter-spacing:1px}.error{color:#ff9eaf;font-size:12px;min-height:20px;margin-top:10px}
+.hidden{display:none!important}
+@media(max-width:390px){main{width:min(100% - 22px,520px);padding-top:21px}header{margin-bottom:27px}.brandmark{width:43px;height:43px;flex-basis:43px}h1{font-size:20px}.connection{padding:8px 9px;font-size:9px}.card{padding:16px}.device-icon{width:54px;height:54px;flex-basis:54px}.device-icon svg{width:34px;height:34px}.device{gap:12px}.state{margin-left:66px}.toggle{min-width:88px;padding:11px 9px}}
+@media(prefers-reduced-motion:no-preference){.card{animation:rise .5s ease both}.card:nth-of-type(2){animation-delay:.07s}.card:nth-of-type(3){animation-delay:.14s}@keyframes rise{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}}
+</style>
 </head>
+
 <body>
 <main>
   <section id="loginView" class="login card">
-    <div class="brand"><div class="brandmark">⌂</div><div><h1>Casa Smart</h1><p class="sub">La tua casa, sotto controllo</p></div></div>
+    <div class="brand"><div class="brandmark"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M5 18.5 20 6l15 12.5V34H5V18.5Z" stroke="currentColor" stroke-width="1.8"/><path d="M14 34V22h12v12M11 17l9-7.5 9 7.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 14v4m-2-2h4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><h1>CASA SANTINI</h1><p class="sub">Smart home interface</p></div></div>
     <form id="loginForm">
       <input id="password" class="field" type="password" placeholder="Password dell'app" autocomplete="current-password" required>
-      <button class="primary" type="submit">Accedi</button>
+      <button class="primary" type="submit">ACCEDI AL SISTEMA</button>
       <div id="loginError" class="error"></div>
     </form>
   </section>
   <section id="appView" class="hidden">
     <header>
-      <div class="brand"><div class="brandmark">⌂</div><div><h1>Casa Smart</h1><div class="sub">La tua casa, sotto controllo</div></div></div>
+      <div class="brand"><div class="brandmark"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M5 18.5 20 6l15 12.5V34H5V18.5Z" stroke="currentColor" stroke-width="1.8"/><path d="M14 34V22h12v12M11 17l9-7.5 9 7.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 14v4m-2-2h4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><h1>CASA SANTINI</h1><div class="sub">Smart home interface</div></div></div>
       <div class="connection"><span id="cloudDot" class="dot"></span><span id="cloudText">Connessione…</span></div>
     </header>
-    <p class="intro">Accessi e illuminazione</p>
+    <p class="intro">Controllo ambiente</p>
     <article class="card gate-card">
-      <div class="row"><div class="device"><div class="device-icon">⌑</div><div><h2>Cancello</h2><div class="hint">Apertura automatica a impulso</div></div></div></div>
-      <button id="gateBtn" class="gate">↗ &nbsp; APRI CANCELLO</button>
+      <div class="row"><div class="device"><div class="device-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 40V11h34v29M5 40h38M11 15h26M13 18v19m7-19v19m8-19v19m7-19v19"/><path d="M7 11 12 7h29l-5 4M24 7V4m-3 3h6"/><path d="M16 42h16" opacity=".5"/></svg></div><div><h2>Cancello</h2><div class="hint">Accesso automatico · impulso</div></div></div></div>
+      <button id="gateBtn" class="gate">⌁ &nbsp; APRI CANCELLO</button>
       <div class="state" id="gateState">In attesa</div>
     </article>
     <article class="card">
-      <div class="row"><div class="device"><div class="device-icon">✦</div><div><h2>Faretti piazzale</h2><div class="hint">Illuminazione esterna</div></div></div><button id="yardBtn" class="toggle" disabled>…</button></div>
+      <div class="row"><div class="device"><div class="device-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 8h30l-4 8H13L9 8Z"/><path d="M15 18 10 34m11-16-2 16m8-16 2 16m4-16 5 16" opacity=".8"/><path d="M7 39h34M16 4V2m8 2V1m8 3V2" opacity=".65"/><circle cx="24" cy="12" r="2" fill="currentColor" stroke="none"/></svg></div><div><h2>Faretti piazzale</h2><div class="hint">Illuminazione esterna</div></div></div><button id="yardBtn" class="toggle" disabled>…</button></div>
       <div class="state" id="yardState">Stato non ancora letto</div>
     </article>
     <article class="card">
-      <div class="row"><div class="device"><div class="device-icon">☼</div><div><h2>Lampioncino scale</h2><div class="hint">Illuminazione ingresso</div></div></div><button id="stairsBtn" class="toggle" disabled>…</button></div>
+      <div class="row"><div class="device"><div class="device-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 39V8h5v31M9 13h20a8 8 0 0 1 8 8v3H14"/><path d="M31 24v-3a5 5 0 0 0-5-5H14"/><path d="M29 25h11l-3 8H26l3-8Z" fill="#ffd36a" fill-opacity=".13"/><path d="m31 35-2 4m7-4 2 4m-9-13-4-3m17 3 3-3" opacity=".75"/><path d="M6 42h9" opacity=".55"/></svg></div><div><h2>Lampioncino scale</h2><div class="hint">Luce area ingresso</div></div></div><button id="stairsBtn" class="toggle" disabled>…</button></div>
       <div class="state" id="stairsState">Stato non ancora letto</div>
     </article>
-    <div class="tools"><div class="updated" id="updated">In attesa del primo aggiornamento</div><button id="refreshBtn" class="refresh">↻ &nbsp; Aggiorna</button></div>
-    <footer>CASA SMART &nbsp;·&nbsp; SHELLY CLOUD</footer>
+    <div class="tools"><div class="updated" id="updated">In attesa del primo aggiornamento</div><button id="refreshBtn" class="refresh">↻ &nbsp; AGGIORNA</button></div>
+    <footer>CASA SANTINI &nbsp;·&nbsp; SECURE SHELLY LINK</footer>
   </section>
 </main>
 <script>
