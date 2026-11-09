@@ -118,15 +118,16 @@ async function command(id,on,pulse=false){
     $("gateState").textContent=pulse?"Impulso inviato":"Comando inviato";
     // Shelly Cloud limits calls to one request per second.
     await new Promise(r=>setTimeout(r,1300));
-    await refresh();
   }catch(err){$("updated").textContent=err.message;}
   finally{busy=false;buttons.forEach(x=>$(x).disabled=false);}
+  if(token) await refresh();
 }
 $("gateBtn").addEventListener("click",()=>command(IDS.gate,true,true));
 $("yardBtn").addEventListener("click",()=>command(IDS.yard,!$("yardBtn").classList.contains("on")));
 $("stairsBtn").addEventListener("click",()=>command(IDS.stairs,!$("stairsBtn").classList.contains("on")));
 $("refreshBtn").addEventListener("click",refresh);
 showApp();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});
 if(token){showApp();refresh();}
 </script>
 </body>
