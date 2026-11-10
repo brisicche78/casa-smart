@@ -1,5 +1,11 @@
-const CACHE = "casa-santini-v3";
-const FILES = ["./", "./index.html", "./manifest.webmanifest"];
+const CACHE = "casa-santini-v4";
+const FILES = [
+  "./",
+  "./index.html",
+  "./manifest.webmanifest",
+  "./icon-192.png",
+  "./icon-512.png"
+];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)));
   self.skipWaiting();
