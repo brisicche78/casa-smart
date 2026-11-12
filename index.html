@@ -158,14 +158,16 @@ function setSession(result){
   sessionStorage.setItem("casaSmartToken",token);
   if(currentUser)sessionStorage.setItem("casaSmartUser",JSON.stringify(currentUser));
   $("userLabel").textContent=currentUser?(currentUser.name+" · "+String(currentUser.role||"utente").toUpperCase()):"Smart home interface";
-  $("adminOpen").classList.toggle("hidden",!currentUser||currentUser.role!=="master");
+  const isMaster=!!currentUser&&currentUser.role==="master";
+  $("adminOpen").classList.toggle("hidden",!isMaster);
+  $("masterAdmin").classList.toggle("hidden",!isMaster);
   $("adminView").classList.add("hidden");$("dashboardView").classList.remove("hidden");
   showApp();
 }
 function clearSession(){
   token="";currentUser=null;
   sessionStorage.removeItem("casaSmartToken");sessionStorage.removeItem("casaSmartUser");
-  $("adminOpen").classList.add("hidden");$("adminView").classList.add("hidden");$("dashboardView").classList.remove("hidden");showApp();
+  $("adminOpen").classList.add("hidden");$("masterAdmin").classList.add("hidden");$("adminView").classList.add("hidden");$("dashboardView").classList.remove("hidden");showApp();
 }
 $("switchLoginMode").addEventListener("click",()=>setLoginMode(loginMode==="master"?"family":"master"));
 
@@ -279,7 +281,9 @@ $("refreshBtn").addEventListener("click",refresh);
 try{currentUser=JSON.parse(sessionStorage.getItem("casaSmartUser")||"null");}catch{currentUser=null;}
 if(currentUser){
   $("userLabel").textContent=currentUser.name+" · "+String(currentUser.role||"utente").toUpperCase();
-  $("adminOpen").classList.toggle("hidden",currentUser.role!=="master");
+  const isMaster=currentUser.role==="master";
+  $("adminOpen").classList.toggle("hidden",!isMaster);
+  $("masterAdmin").classList.toggle("hidden",!isMaster);
 }
 showApp();setLoginMode("master");
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
