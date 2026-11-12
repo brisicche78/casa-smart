@@ -50,6 +50,21 @@ footer{text-align:center;color:#536b88;font-size:9px;margin-top:28px;letter-spac
 .hidden{display:none!important}
 @media(max-width:390px){main{width:min(100% - 22px,520px);padding-top:21px}header{margin-bottom:27px}.brandmark{width:43px;height:43px;flex-basis:43px}h1{font-size:20px}.connection{padding:8px 9px;font-size:9px}.card{padding:16px}.device-icon{width:54px;height:54px;flex-basis:54px}.device-icon svg{width:34px;height:34px}.device{gap:12px}.state{margin-left:66px}.toggle{min-width:88px;padding:11px 9px}}
 @media(prefers-reduced-motion:no-preference){.card{animation:rise .5s ease both}.card:nth-of-type(2){animation-delay:.07s}.card:nth-of-type(3){animation-delay:.14s}@keyframes rise{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}}
+
+/* Family / MASTER panel */
+.secondary{width:100%;padding:13px;background:#12243a;border:1px solid #2b4968;color:#c8e4ff;letter-spacing:.7px;margin-top:9px}
+.admin-card{padding:18px}.admin-card h2{margin:0;font-size:15px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.panel-head button{padding:8px 10px;background:#14243a;border:1px solid #2b4563;color:#b9d3ed;font-size:10px}
+.admin-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #203452}
+.admin-row:first-child{border-top:0}.admin-name{font-size:13px;font-weight:750}.admin-meta{font-size:10px;color:#8399b5;margin-top:5px}
+.admin-actions{display:flex;gap:7px;flex-shrink:0}.small-btn{padding:9px 11px;border-radius:10px;background:#123c3a;border:1px solid #237a70;color:#9dffe2;font-size:10px}
+.small-btn.reject{background:#351927;border-color:#754055;color:#ffb5c5}.small-btn.revoke{background:#302516;border-color:#75603b;color:#ffe0a0}
+.status-pill{display:inline-block;padding:4px 7px;border-radius:20px;background:#26334a;color:#b8c9df;font-size:9px;text-transform:uppercase;letter-spacing:.5px}
+.status-pill.pending{background:#463819;color:#ffe09a}.status-pill.active{background:#123d36;color:#8fffd7}.status-pill.rejected,.status-pill.revoked{background:#401f30;color:#ff9db5}
+.empty{font-size:12px;color:#8399b5;padding:10px 0}.note{font-size:11px;color:#8399b5;line-height:1.55;margin:10px 0 0}
+.logout{padding:10px 13px;background:#172338;border:1px solid #30445f;color:#c6d7eb;font-size:10px;letter-spacing:.7px}
+@media(max-width:390px){.admin-row{align-items:flex-start}.admin-actions{flex-direction:column}}
+
 </style>
 </head>
 
@@ -57,17 +72,42 @@ footer{text-align:center;color:#536b88;font-size:9px;margin-top:28px;letter-spac
 <main>
   <section id="loginView" class="login card">
     <div class="brand"><div class="brandmark"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M5 18.5 20 6l15 12.5V34H5V18.5Z" stroke="currentColor" stroke-width="1.8"/><path d="M14 34V22h12v12M11 17l9-7.5 9 7.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 14v4m-2-2h4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><h1>CASA SANTINI</h1><p class="sub">Smart home interface</p></div></div>
-    <form id="loginForm">
-      <input id="password" class="field" type="password" placeholder="Password dell'app" autocomplete="current-password" required>
-      <button class="primary" type="submit">ACCEDI AL SISTEMA</button>
-      <div id="loginError" class="error"></div>
-    </form>
+    <div id="loginModeMaster">
+      <form id="loginForm">
+        <input id="password" class="field" type="password" placeholder="Password MASTER" autocomplete="current-password" required>
+        <button class="primary" type="submit">ACCEDI AL SISTEMA</button>
+        <div id="loginError" class="error"></div>
+      </form>
+    </div>
+    <div id="loginModeFamily" class="hidden">
+      <form id="familyForm">
+        <input id="familyName" class="field" type="text" maxlength="50" placeholder="Il tuo nome" autocomplete="name" required>
+        <input id="familyPassword" class="field" type="password" placeholder="Password famiglia" autocomplete="off" required>
+        <button class="primary" type="submit">INVIA RICHIESTA</button>
+        <div id="familyMessage" class="error"></div>
+      </form>
+      <p class="note">La richiesta dovrà essere approvata dal MASTER. In questa fase non viene ancora attivato l'accesso ai dispositivi.</p>
+    </div>
+    <button id="switchLoginMode" class="secondary" type="button">Sono un familiare · Richiedi accesso</button>
   </section>
   <section id="appView" class="hidden">
     <header>
-      <div class="brand"><div class="brandmark"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M5 18.5 20 6l15 12.5V34H5V18.5Z" stroke="currentColor" stroke-width="1.8"/><path d="M14 34V22h12v12M11 17l9-7.5 9 7.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 14v4m-2-2h4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><h1>CASA SANTINI</h1><div class="sub">Smart home interface</div></div></div>
+      <div class="brand"><div class="brandmark"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M5 18.5 20 6l15 12.5V34H5V18.5Z" stroke="currentColor" stroke-width="1.8"/><path d="M14 34V22h12v12M11 17l9-7.5 9 7.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 14v4m-2-2h4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><h1>CASA SANTINI</h1><div id="userLabel" class="sub">Smart home interface</div></div></div>
       <div class="connection"><span id="cloudDot" class="dot"></span><span id="cloudText">Connessione…</span></div>
     </header>
+    <div id="masterAdmin" class="hidden">
+      <p class="intro">Gestione famiglia · MASTER</p>
+      <article class="card admin-card">
+        <div class="panel-head"><h2>Richieste in attesa</h2><button id="reloadRequests" type="button">↻ AGGIORNA</button></div>
+        <div id="requestsList"><div class="empty">Caricamento richieste…</div></div>
+        <div id="requestsMessage" class="note"></div>
+      </article>
+      <article class="card admin-card">
+        <div class="panel-head"><h2>Utenti autorizzati</h2><button id="reloadUsers" type="button">↻ AGGIORNA</button></div>
+        <div id="usersList"><div class="empty">Caricamento utenti…</div></div>
+        <div id="usersMessage" class="note"></div>
+      </article>
+    </div>
     <p class="intro">Controllo ambiente</p>
     <article class="card gate-card">
       <div class="row"><div class="device"><div class="device-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 40V11h34v29M5 40h38M11 15h26M13 18v19m7-19v19m8-19v19m7-19v19"/><path d="M7 11 12 7h29l-5 4M24 7V4m-3 3h6"/><path d="M16 42h16" opacity=".5"/></svg></div><div><h2>Cancello</h2><div class="hint">Accesso automatico · impulso</div></div></div></div>
@@ -99,11 +139,103 @@ async function api(path,body,authenticated=true){
   const data=await res.json().catch(()=>({error:"Risposta non valida dal server"}));
   if(!res.ok)throw new Error(data.error||"Errore HTTP "+res.status);return data;
 }
+let currentUser = null;
+let loginMode = "master";
+function setLoginMode(mode){
+  loginMode=mode;
+  $("loginModeMaster").classList.toggle("hidden",mode!=="master");
+  $("loginModeFamily").classList.toggle("hidden",mode!=="family");
+  $("switchLoginMode").textContent=mode==="master"?"Sono un familiare · Richiedi accesso":"Torna all'accesso MASTER";
+}
+function setSession(result){
+  token=result.token;
+  currentUser=result.user||null;
+  sessionStorage.setItem("casaSmartToken",token);
+  if(currentUser)sessionStorage.setItem("casaSmartUser",JSON.stringify(currentUser));
+  $("userLabel").textContent=currentUser?(currentUser.name+" · "+String(currentUser.role||"utente").toUpperCase()):"Smart home interface";
+  $("masterAdmin").classList.toggle("hidden",!currentUser||currentUser.role!=="master");
+  showApp();
+}
+function clearSession(){
+  token="";currentUser=null;
+  sessionStorage.removeItem("casaSmartToken");sessionStorage.removeItem("casaSmartUser");
+  $("masterAdmin").classList.add("hidden");showApp();
+}
+$("switchLoginMode").addEventListener("click",()=>setLoginMode(loginMode==="master"?"family":"master"));
+
 $("loginForm").addEventListener("submit",async e=>{
   e.preventDefault();$("loginError").textContent="Accesso in corso…";
-  try{const r=await api("/login",{password:$("password").value},false);token=r.token;sessionStorage.setItem("casaSmartToken",token);$("password").value="";$("loginError").textContent="";showApp();await refresh();}
-  catch(err){$("loginError").textContent=err.message;}
+  try{
+    const r=await api("/login",{password:$("password").value},false);
+    $("password").value="";$("loginError").textContent="";
+    setSession(r);
+    await refresh();
+    if(currentUser&&currentUser.role==="master")await loadAdmin();
+  }catch(err){$("loginError").textContent=err.message;}
 });
+$("familyForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const name=$("familyName").value.trim(),password=$("familyPassword").value;
+  $("familyMessage").className="error";$("familyMessage").textContent="Invio richiesta…";
+  try{
+    const r=await api("/family/request",{name,password},false);
+    $("familyMessage").className="success";
+    $("familyMessage").textContent=r.message||"Richiesta inviata. Attendi l'approvazione del MASTER.";
+    $("familyForm").reset();
+  }catch(err){$("familyMessage").textContent=err.message;}
+});
+
+function normalizeList(data,keys){
+  if(Array.isArray(data))return data;
+  for(const key of keys)if(Array.isArray(data?.[key]))return data[key];
+  return [];
+}
+function safeText(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function statusClass(status){return ["pending","active","rejected","revoked"].includes(status)?status:"";}
+function statusLabel(status){return ({pending:"In attesa",active:"Attivo",rejected:"Rifiutato",revoked:"Revocato"})[status]||status||"—";}
+async function loadRequests(){
+  $("requestsList").innerHTML='<div class="empty">Caricamento…</div>';$("requestsMessage").textContent="";
+  try{
+    const data=await api("/admin/requests",{});
+    const list=normalizeList(data,["requests","users","pending"]);
+    if(!list.length){$("requestsList").innerHTML='<div class="empty">Nessuna richiesta in attesa.</div>';return;}
+    $("requestsList").innerHTML=list.map(u=>{
+      const id=u.id||u.userId||u.user_id;
+      return '<div class="admin-row"><div><div class="admin-name">'+safeText(u.name||"Utente")+'</div><div class="admin-meta">Richiesta · '+safeText(u.created_at||u.createdAt||"")+'</div></div><div class="admin-actions"><button class="small-btn" data-action="approve" data-id="'+safeText(id)+'">APPROVA</button><button class="small-btn reject" data-action="reject" data-id="'+safeText(id)+'">RIFIUTA</button></div></div>';
+    }).join("");
+  }catch(err){$("requestsList").innerHTML='<div class="empty">Impossibile caricare le richieste.</div>';$("requestsMessage").textContent=err.message;}
+}
+async function loadUsers(){
+  $("usersList").innerHTML='<div class="empty">Caricamento…</div>';$("usersMessage").textContent="";
+  try{
+    const data=await api("/admin/users",{});
+    const list=normalizeList(data,["users","members","items"]);
+    if(!list.length){$("usersList").innerHTML='<div class="empty">Nessun utente restituito dal server.</div>';return;}
+    $("usersList").innerHTML=list.map(u=>{
+      const id=u.id||u.userId||u.user_id,status=u.status||"active",role=u.role||"member";
+      const canRevoke=role!=="master"&&status==="active";
+      return '<div class="admin-row"><div><div class="admin-name">'+safeText(u.name||"Utente")+(role==="master"?' <span class="status-pill">MASTER</span>':"")+'</div><div class="admin-meta"><span class="status-pill '+statusClass(status)+'">'+safeText(statusLabel(status))+'</span></div></div>'+(canRevoke?'<div class="admin-actions"><button class="small-btn revoke" data-action="revoke" data-id="'+safeText(id)+'">REVOCA</button></div>':"")+'</div>';
+    }).join("");
+  }catch(err){$("usersList").innerHTML='<div class="empty">Impossibile caricare gli utenti.</div>';$("usersMessage").textContent=err.message;}
+}
+async function loadAdmin(){await Promise.all([loadRequests(),loadUsers()]);}
+async function adminAction(action,userId){
+  if(!userId)return;
+  const labels={approve:"Confermi l'approvazione di questo familiare?",reject:"Vuoi rifiutare questa richiesta?",revoke:"Vuoi revocare l'accesso a questo utente?"};
+  if(!confirm(labels[action]||"Confermi l'operazione?"))return;
+  const endpoint={approve:"/admin/approve",reject:"/admin/reject",revoke:"/admin/revoke"}[action];
+  try{
+    await api(endpoint,{userId});
+    $("requestsMessage").textContent="Operazione completata.";
+    await loadAdmin();
+  }catch(err){$("requestsMessage").textContent="Operazione non riuscita: "+err.message;}
+}
+$("requestsList").addEventListener("click",e=>{const b=e.target.closest("button[data-action]");if(b)adminAction(b.dataset.action,b.dataset.id);});
+$("usersList").addEventListener("click",e=>{const b=e.target.closest("button[data-action]");if(b)adminAction(b.dataset.action,b.dataset.id);});
+$("reloadRequests").addEventListener("click",loadRequests);
+$("reloadUsers").addEventListener("click",loadUsers);
+$("logoutBtn").addEventListener("click",clearSession);
+
 function outputOf(device){
   const s=device.status||{};const sw=s["switch:0"]||s.switch||s;
   if(typeof sw.output==="boolean")return sw.output;if(typeof sw.on==="boolean")return sw.on;if(typeof s.output==="boolean")return s.output;return null;
@@ -137,7 +269,14 @@ $("gateBtn").addEventListener("click",()=>command(IDS.gate,true,true));
 $("yardBtn").addEventListener("click",()=>command(IDS.yard,!$("yardBtn").classList.contains("on")));
 $("stairsBtn").addEventListener("click",()=>command(IDS.stairs,!$("stairsBtn").classList.contains("on")));
 $("refreshBtn").addEventListener("click",refresh);
-showApp();if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});if(token){showApp();refresh();}
+try{currentUser=JSON.parse(sessionStorage.getItem("casaSmartUser")||"null");}catch{currentUser=null;}
+if(currentUser){
+  $("userLabel").textContent=currentUser.name+" · "+String(currentUser.role||"utente").toUpperCase();
+  $("masterAdmin").classList.toggle("hidden",currentUser.role!=="master");
+}
+showApp();setLoginMode("master");
+if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
+if(token){showApp();refresh().then(()=>{if(token&&currentUser&&currentUser.role==="master")loadAdmin();});}
 </script>
 </body>
 </html>
