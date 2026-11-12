@@ -234,7 +234,6 @@ $("requestsList").addEventListener("click",e=>{const b=e.target.closest("button[
 $("usersList").addEventListener("click",e=>{const b=e.target.closest("button[data-action]");if(b)adminAction(b.dataset.action,b.dataset.id);});
 $("reloadRequests").addEventListener("click",loadRequests);
 $("reloadUsers").addEventListener("click",loadUsers);
-$("logoutBtn").addEventListener("click",clearSession);
 
 function outputOf(device){
   const s=device.status||{};const sw=s["switch:0"]||s.switch||s;
