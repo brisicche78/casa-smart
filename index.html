@@ -17,7 +17,7 @@ main{position:relative;width:min(100% - 30px,520px);margin:0 auto;padding:30px 0
 .brandmark{width:48px;height:48px;flex:0 0 48px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(145deg,#102f4d,#0b1b30);border:1px solid #28658a;box-shadow:inset 0 0 20px #29d9ff19,0 0 26px #087eb52b;color:var(--cyan)}
 .brandmark svg{width:29px;height:29px}
 h1{font-size:24px;letter-spacing:2px;margin:0;font-weight:850}.sub{font-size:10px;color:#7f9bbd;margin-top:5px;letter-spacing:2px;text-transform:uppercase}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:7px 2px 34px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:7px 2px 34px}.header-actions{display:flex;align-items:center;gap:8px}.admin-open{padding:9px 11px;background:#12243a;border:1px solid #2b4968;color:#bfeaff;font-size:9px;letter-spacing:.5px;white-space:nowrap}.back-btn{padding:10px 13px;background:#12243a;border:1px solid #2b4968;color:#c8e4ff;font-size:10px;margin:0 0 14px}
 .connection{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #25405d;border-radius:30px;background:#0a1525d9;color:#a9c0da;font-size:10px;letter-spacing:.7px;white-space:nowrap;text-transform:uppercase}
 .dot{width:7px;height:7px;border-radius:50%;background:#718096;box-shadow:0 0 0 3px #71809622}.dot.ok{background:var(--green);box-shadow:0 0 10px #48f0bd,0 0 0 4px #48f0bd20}.dot.bad{background:var(--red);box-shadow:0 0 0 3px #ff668c22}
 .intro{display:flex;align-items:center;gap:10px;font-size:10px;color:#7894b5;letter-spacing:2.3px;text-transform:uppercase;font-weight:800;margin:0 4px 14px}.intro:before{content:"";width:19px;height:1px;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
@@ -93,21 +93,9 @@ footer{text-align:center;color:#536b88;font-size:9px;margin-top:28px;letter-spac
   <section id="appView" class="hidden">
     <header>
       <div class="brand"><div class="brandmark"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M5 18.5 20 6l15 12.5V34H5V18.5Z" stroke="currentColor" stroke-width="1.8"/><path d="M14 34V22h12v12M11 17l9-7.5 9 7.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 14v4m-2-2h4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><h1>CASA SANTINI</h1><div id="userLabel" class="sub">Smart home interface</div></div></div>
-      <div class="connection"><span id="cloudDot" class="dot"></span><span id="cloudText">Connessione…</span></div>
+      <div class="header-actions"><button id="adminOpen" class="admin-open hidden" type="button">UTENTI</button><div class="connection"><span id="cloudDot" class="dot"></span><span id="cloudText">Connessione…</span></div></div>
     </header>
-    <div id="masterAdmin" class="hidden">
-      <p class="intro">Gestione famiglia · MASTER</p>
-      <article class="card admin-card">
-        <div class="panel-head"><h2>Richieste in attesa</h2><button id="reloadRequests" type="button">↻ AGGIORNA</button></div>
-        <div id="requestsList"><div class="empty">Caricamento richieste…</div></div>
-        <div id="requestsMessage" class="note"></div>
-      </article>
-      <article class="card admin-card">
-        <div class="panel-head"><h2>Utenti autorizzati</h2><button id="reloadUsers" type="button">↻ AGGIORNA</button></div>
-        <div id="usersList"><div class="empty">Caricamento utenti…</div></div>
-        <div id="usersMessage" class="note"></div>
-      </article>
-    </div>
+    <section id="dashboardView">
     <p class="intro">Controllo ambiente</p>
     <article class="card gate-card">
       <div class="row"><div class="device"><div class="device-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 40V11h34v29M5 40h38M11 15h26M13 18v19m7-19v19m8-19v19m7-19v19"/><path d="M7 11 12 7h29l-5 4M24 7V4m-3 3h6"/><path d="M16 42h16" opacity=".5"/></svg></div><div><h2>Cancello</h2><div class="hint">Accesso automatico · impulso</div></div></div></div>
@@ -124,6 +112,23 @@ footer{text-align:center;color:#536b88;font-size:9px;margin-top:28px;letter-spac
     </article>
     <div class="tools"><div class="updated" id="updated">In attesa del primo aggiornamento</div><button id="refreshBtn" class="refresh">↻ &nbsp; AGGIORNA</button></div>
     <footer>CASA SANTINI &nbsp;·&nbsp; SECURE SHELLY LINK</footer>
+    </section>
+    <section id="adminView" class="hidden">
+      <button id="adminBack" class="back-btn" type="button">← TORNA AI DISPOSITIVI</button>
+      <div id="masterAdmin" class="hidden">
+      <p class="intro">Gestione famiglia · MASTER</p>
+      <article class="card admin-card">
+        <div class="panel-head"><h2>Richieste in attesa</h2><button id="reloadRequests" type="button">↻ AGGIORNA</button></div>
+        <div id="requestsList"><div class="empty">Caricamento richieste…</div></div>
+        <div id="requestsMessage" class="note"></div>
+      </article>
+      <article class="card admin-card">
+        <div class="panel-head"><h2>Utenti autorizzati</h2><button id="reloadUsers" type="button">↻ AGGIORNA</button></div>
+        <div id="usersList"><div class="empty">Caricamento utenti…</div></div>
+        <div id="usersMessage" class="note"></div>
+      </article>
+    </div>
+    </section>
   </section>
 </main>
 <script>
@@ -153,13 +158,14 @@ function setSession(result){
   sessionStorage.setItem("casaSmartToken",token);
   if(currentUser)sessionStorage.setItem("casaSmartUser",JSON.stringify(currentUser));
   $("userLabel").textContent=currentUser?(currentUser.name+" · "+String(currentUser.role||"utente").toUpperCase()):"Smart home interface";
-  $("masterAdmin").classList.toggle("hidden",!currentUser||currentUser.role!=="master");
+  $("adminOpen").classList.toggle("hidden",!currentUser||currentUser.role!=="master");
+  $("adminView").classList.add("hidden");$("dashboardView").classList.remove("hidden");
   showApp();
 }
 function clearSession(){
   token="";currentUser=null;
   sessionStorage.removeItem("casaSmartToken");sessionStorage.removeItem("casaSmartUser");
-  $("masterAdmin").classList.add("hidden");showApp();
+  $("adminOpen").classList.add("hidden");$("adminView").classList.add("hidden");$("dashboardView").classList.remove("hidden");showApp();
 }
 $("switchLoginMode").addEventListener("click",()=>setLoginMode(loginMode==="master"?"family":"master"));
 
@@ -232,6 +238,8 @@ async function adminAction(action,userId){
 }
 $("requestsList").addEventListener("click",e=>{const b=e.target.closest("button[data-action]");if(b)adminAction(b.dataset.action,b.dataset.id);});
 $("usersList").addEventListener("click",e=>{const b=e.target.closest("button[data-action]");if(b)adminAction(b.dataset.action,b.dataset.id);});
+$("adminOpen").addEventListener("click",()=>{$("dashboardView").classList.add("hidden");$("adminView").classList.remove("hidden");loadAdmin();});
+$("adminBack").addEventListener("click",()=>{$("adminView").classList.add("hidden");$("dashboardView").classList.remove("hidden");});
 $("reloadRequests").addEventListener("click",loadRequests);
 $("reloadUsers").addEventListener("click",loadUsers);
 
@@ -271,7 +279,7 @@ $("refreshBtn").addEventListener("click",refresh);
 try{currentUser=JSON.parse(sessionStorage.getItem("casaSmartUser")||"null");}catch{currentUser=null;}
 if(currentUser){
   $("userLabel").textContent=currentUser.name+" · "+String(currentUser.role||"utente").toUpperCase();
-  $("masterAdmin").classList.toggle("hidden",currentUser.role!=="master");
+  $("adminOpen").classList.toggle("hidden",currentUser.role!=="master");
 }
 showApp();setLoginMode("master");
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
