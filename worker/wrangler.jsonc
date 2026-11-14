@@ -6,5 +6,13 @@
   "observability": {
     "enabled": true
   },
-  "preview_urls": true
+  "preview_urls": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "casa-santini-webauthn-preview",
+      "database_id": "6dde54c9-44a0-4c41-868c-3dfa65509946",
+      "preview_database_id": "6dde54c9-44a0-4c41-868c-3dfa65509946"
+    }
+  ]
 }
