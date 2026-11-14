@@ -1,0 +1,16 @@
+{
+  "name": "casa-smart-api-webauthn",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "preview": "wrangler preview",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@simplewebauthn/server": "14.1.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.135.0"
+  }
+}
