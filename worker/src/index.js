@@ -97,6 +97,23 @@ function allowedRequestOrigin(request, env) {
     request.headers.get("Origin") === env.WEBAUTHN_ORIGIN;
 }
 
+async function sha256Hex(value) {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(value)
+  );
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function randomToken() {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
 async function masterRegistrationOptions(request, env, origin) {
   if (!allowedRequestOrigin(request, env)) {
     return json({ error: "Origine non autorizzata" }, 403, origin, env.WEBAUTHN_ORIGIN);
@@ -106,6 +123,8 @@ async function masterRegistrationOptions(request, env, origin) {
     return json({ error: "Troppi tentativi. Riprova più tardi." }, 429, origin, env.WEBAUTHN_ORIGIN);
   }
 
+  // Il segreto è accettato soltanto per avviare la cerimonia.
+  // Non viene mai richiesto né restituito dal client statico della PWA.
   if (!hasEnrollmentSecret(request, env)) {
     return json({ error: "Autorizzazione non valida" }, 401, origin, env.WEBAUTHN_ORIGIN);
   }
@@ -146,19 +165,32 @@ async function masterRegistrationOptions(request, env, origin) {
   });
 
   const challengeId = crypto.randomUUID();
+  const grantId = crypto.randomUUID();
+  const grantToken = randomToken();
+  const grantHash = await sha256Hex(grantToken);
 
+  // Un solo grant temporaneo attivo. Una nuova inizializzazione invalida
+  // gli eventuali grant precedenti; entrambi i record scadono in 5 minuti.
   await env.DB.batch([
+    env.DB.prepare(
+      "DELETE FROM webauthn_challenges WHERE user_id = ? AND purpose = 'master-enrollment-grant'"
+    ).bind(MASTER_ID),
     env.DB.prepare(
       "INSERT INTO app_users (id, name, role, status) VALUES (?, 'Alessandro', 'master', 'active') ON CONFLICT(id) DO NOTHING"
     ).bind(MASTER_ID),
     env.DB.prepare(
       "INSERT INTO webauthn_challenges (id, user_id, challenge, purpose, expires_at) VALUES (?, ?, ?, 'master-registration', unixepoch() + ?)"
-    ).bind(challengeId, MASTER_ID, options.challenge, CHALLENGE_TTL_SECONDS)
+    ).bind(challengeId, MASTER_ID, options.challenge, CHALLENGE_TTL_SECONDS),
+    env.DB.prepare(
+      "INSERT INTO webauthn_challenges (id, user_id, challenge, purpose, expires_at) VALUES (?, ?, ?, 'master-enrollment-grant', unixepoch() + ?)"
+    ).bind(grantId, MASTER_ID, grantHash, CHALLENGE_TTL_SECONDS)
   ]);
 
   return json({
     ok: true,
     challengeId,
+    grantId,
+    grantToken,
     options
   }, 200, origin, env.WEBAUTHN_ORIGIN);
 }
@@ -172,10 +204,6 @@ async function verifyMasterRegistration(request, env, origin) {
     return json({ error: "Troppi tentativi. Riprova più tardi." }, 429, origin, env.WEBAUTHN_ORIGIN);
   }
 
-  if (!hasEnrollmentSecret(request, env)) {
-    return json({ error: "Autorizzazione non valida" }, 401, origin, env.WEBAUTHN_ORIGIN);
-  }
-
   let body;
   try {
     body = await readJson(request);
@@ -185,11 +213,32 @@ async function verifyMasterRegistration(request, env, origin) {
 
   if (
     typeof body.challengeId !== "string" ||
+    typeof body.grantId !== "string" ||
     !body.response ||
     typeof body.response !== "object" ||
     typeof body.response.id !== "string"
   ) {
     return json({ error: "Dati di registrazione incompleti" }, 400, origin, env.WEBAUTHN_ORIGIN);
+  }
+
+  // La verifica usa un grant casuale, monouso e con scadenza.
+  // Il MASTER_ENROLLMENT_SECRET non viene inviato nella seconda richiesta.
+  const authorization = request.headers.get("Authorization") || "";
+  const grantToken = authorization.startsWith("Bearer ")
+    ? authorization.slice(7)
+    : "";
+
+  if (!grantToken || grantToken.length > 256) {
+    return json({ error: "Autorizzazione di registrazione mancante" }, 401, origin, env.WEBAUTHN_ORIGIN);
+  }
+
+  const grantHash = await sha256Hex(grantToken);
+  const grant = await env.DB.prepare(
+    "SELECT id FROM webauthn_challenges WHERE id = ? AND user_id = ? AND challenge = ? AND purpose = 'master-enrollment-grant' AND expires_at > unixepoch()"
+  ).bind(body.grantId, MASTER_ID, grantHash).first();
+
+  if (!grant) {
+    return json({ error: "Autorizzazione scaduta o già utilizzata. Avvia una nuova registrazione." }, 401, origin, env.WEBAUTHN_ORIGIN);
   }
 
   const storedChallenge = await env.DB.prepare(
@@ -230,9 +279,12 @@ async function verifyMasterRegistration(request, env, origin) {
     ? JSON.stringify(credential.transports)
     : null;
 
+  // L'inserimento è condizionato alla presenza contemporanea di challenge
+  // e grant validi. Il batch D1 è atomico: il grant viene consumato insieme
+  // al salvataggio della credential, impedendo un secondo utilizzo.
   const results = await env.DB.batch([
     env.DB.prepare(
-      "INSERT INTO webauthn_credentials (id, user_id, credential_id, public_key, sign_count, transports, device_name) SELECT ?, ?, ?, ?, ?, ?, 'MASTER' WHERE EXISTS (SELECT 1 FROM webauthn_challenges WHERE id = ? AND user_id = ? AND purpose = 'master-registration' AND expires_at > unixepoch()) AND NOT EXISTS (SELECT 1 FROM webauthn_credentials WHERE user_id = ?)"
+      "INSERT INTO webauthn_credentials (id, user_id, credential_id, public_key, sign_count, transports, device_name) SELECT ?, ?, ?, ?, ?, ?, 'MASTER' WHERE EXISTS (SELECT 1 FROM webauthn_challenges WHERE id = ? AND user_id = ? AND purpose = 'master-registration' AND challenge = ? AND expires_at > unixepoch()) AND EXISTS (SELECT 1 FROM webauthn_challenges WHERE id = ? AND user_id = ? AND challenge = ? AND purpose = 'master-enrollment-grant' AND expires_at > unixepoch()) AND NOT EXISTS (SELECT 1 FROM webauthn_credentials WHERE user_id = ?)"
     ).bind(
       crypto.randomUUID(),
       MASTER_ID,
@@ -242,16 +294,20 @@ async function verifyMasterRegistration(request, env, origin) {
       transports,
       body.challengeId,
       MASTER_ID,
+      storedChallenge.challenge,
+      body.grantId,
+      MASTER_ID,
+      grantHash,
       MASTER_ID
     ),
     env.DB.prepare(
-      "DELETE FROM webauthn_challenges WHERE id = ? AND user_id = ? AND purpose = 'master-registration'"
-    ).bind(body.challengeId, MASTER_ID)
+      "DELETE FROM webauthn_challenges WHERE (id = ? AND user_id = ? AND purpose = 'master-registration') OR (id = ? AND user_id = ? AND purpose = 'master-enrollment-grant')"
+    ).bind(body.challengeId, MASTER_ID, body.grantId, MASTER_ID)
   ]);
 
   const inserted = Number(results?.[0]?.meta?.changes || 0);
   if (inserted !== 1) {
-    return json({ error: "Registrazione già completata o challenge non più valida" }, 409, origin, env.WEBAUTHN_ORIGIN);
+    return json({ error: "Registrazione già completata o autorizzazione non più valida" }, 409, origin, env.WEBAUTHN_ORIGIN);
   }
 
   return json({
@@ -260,6 +316,7 @@ async function verifyMasterRegistration(request, env, origin) {
     user: "Alessandro",
     role: "master",
     credentialSaved: true,
+    grantConsumed: true,
     nextStep: "master-passkey-created"
   }, 200, origin, env.WEBAUTHN_ORIGIN);
 }
