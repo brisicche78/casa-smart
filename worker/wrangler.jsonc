@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "casa-smart-api-webauthn-preview",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-14",
+  "observability": {
+    "enabled": true
+  },
+  "preview_urls": true
+}
