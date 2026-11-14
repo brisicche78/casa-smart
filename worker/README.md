@@ -22,4 +22,3 @@ Prima di collegare Workers Builds occorre configurare una Preview isolata, con u
 3. Configurare database e segreti esclusivamente per Preview.
 4. Testare revoca, scadenza challenge, origin, RP ID, firma e contatore.
 5. Solo dopo approvazione esplicita valutare il rilascio in produzione.
-
