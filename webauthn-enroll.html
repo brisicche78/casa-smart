@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta http-equiv="Cache-Control" content="no-store">
+  <meta name="referrer" content="no-referrer">
+  <title>Inizializzazione Passkey MASTER · Casa Santini</title>
+  <style>
+    :root{color-scheme:dark;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#090d16;color:#edf2ff}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 0,#17243c 0,transparent 55%),#090d16}
+    main{width:min(100%,480px);padding:28px;border:1px solid #273650;border-radius:20px;background:rgba(15,23,38,.96);box-shadow:0 24px 80px #0008}
+    .mark{font-size:12px;letter-spacing:.16em;color:#8da9d6;text-transform:uppercase}
+    h1{font-size:25px;margin:10px 0 8px}
+    p{color:#aebbd0;line-height:1.55}
+    label{display:block;margin:22px 0 8px;font-size:14px;color:#dce6f8}
+    input{width:100%;padding:14px;border:1px solid #344762;border-radius:12px;background:#080e19;color:#fff;font:inherit}
+    button{width:100%;margin-top:16px;padding:14px;border:0;border-radius:12px;background:#78a9ff;color:#07101f;font-weight:750;font-size:15px;cursor:pointer}
+    button:disabled{opacity:.55;cursor:wait}
+    #status{min-height:48px;margin-top:18px;padding:12px;border-radius:10px;background:#0a1322;color:#c8d7ef;font-size:14px;white-space:pre-wrap}
+    .warning{font-size:13px;color:#e8c98b;border-left:3px solid #b78a3d;padding-left:12px;margin-top:18px}
+    .foot{font-size:12px;color:#71839f;margin-top:22px}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="mark">Casa Santini · procedura protetta</div>
+    <h1>Inizializza Passkey MASTER</h1>
+    <p>Questa pagina crea la Passkey MASTER sul database Preview isolato. Non modifica l'accesso normale alla PWA e non è collegata ai dispositivi Shelly.</p>
+    <label for="secret">Segreto monouso di inizializzazione</label>
+    <input id="secret" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Inserisci il segreto solo quando richiesto">
+    <button id="start" type="button">Avvia registrazione Passkey</button>
+    <div id="status" role="status" aria-live="polite">Non avviato. Prima di procedere, assicurati di avere a disposizione il dispositivo su cui vuoi creare la Passkey.</div>
+    <div class="warning">Durante la procedura non chiudere la pagina. Se annulli la richiesta del sistema, attendi la scadenza di cinque minuti prima di riprovare. Il segreto non viene salvato in questa pagina.</div>
+    <div class="foot">Connessione esclusiva al Worker WebAuthn Preview · nessun collegamento al Worker di produzione.</div>
+  </main>
+<script>
+(() => {
+  "use strict";
+  const API = "https://casa-smart-api-webauthn-preview.brisicche78.workers.dev";
+  const button = document.getElementById("start");
+  const secretInput = document.getElementById("secret");
+  const statusBox = document.getElementById("status");
+
+  function status(message) {
+    statusBox.textContent = message;
+  }
+  function decodeBase64url(value) {
+    const padded = value.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - value.length % 4) % 4);
+    const binary = atob(padded);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes.buffer;
+  }
+  function encodeBase64url(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+  }
+  async function post(path, payload, token) {
+    const response = await fetch(API + path, {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + token,
+        ...(payload ? {"Content-Type":"application/json"} : {})
+      },
+      body: payload ? JSON.stringify(payload) : undefined,
+      cache: "no-store",
+      credentials: "omit",
+      referrerPolicy: "no-referrer"
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || ("Errore HTTP " + response.status));
+    return data;
+  }
+
+  button.addEventListener("click", async () => {
+    if (button.disabled) return;
+    if (!window.isSecureContext || !navigator.credentials || !navigator.credentials.create) {
+      status("Questo browser non supporta la creazione di Passkey in un contesto sicuro. Apri la pagina con HTTPS da un browser aggiornato.");
+      return;
+    }
+    const secret = secretInput.value.trim();
+    if (!secret) {
+      status("Inserisci il segreto di inizializzazione.");
+      secretInput.focus();
+      return;
+    }
+
+    button.disabled = true;
+    secretInput.value = "";
+    let grantToken = "";
+    try {
+      status("Controllo autorizzazione e preparo la registrazione…");
+      const prepared = await post("/webauthn/master/register/options", null, secret);
+      if (!prepared.options || !prepared.challengeId || !prepared.grantId || !prepared.grantToken) {
+        throw new Error("Risposta del server incompleta.");
+      }
+      grantToken = prepared.grantToken;
+
+      const publicKey = prepared.options;
+      publicKey.challenge = decodeBase64url(publicKey.challenge);
+      publicKey.user.id = decodeBase64url(publicKey.user.id);
+      if (Array.isArray(publicKey.excludeCredentials)) {
+        publicKey.excludeCredentials = publicKey.excludeCredentials.map(item => ({...item, id:decodeBase64url(item.id)}));
+      }
+
+      status("Ora conferma la creazione della Passkey nella finestra del dispositivo (impronta, volto o PIN).");
+      const credential = await navigator.credentials.create({publicKey});
+      if (!credential) throw new Error("Creazione della Passkey annullata.");
+
+      const attestation = credential.response;
+      const responseBody = {
+        challengeId: prepared.challengeId,
+        grantId: prepared.grantId,
+        response: {
+          id: credential.id,
+          rawId: encodeBase64url(credential.rawId),
+          type: credential.type,
+          response: {
+            attestationObject: encodeBase64url(attestation.attestationObject),
+            clientDataJSON: encodeBase64url(attestation.clientDataJSON),
+            transports: typeof attestation.getTransports === "function" ? attestation.getTransports() : []
+          },
+          clientExtensionResults: credential.getClientExtensionResults(),
+          authenticatorAttachment: credential.authenticatorAttachment || null
+        }
+      };
+
+      status("Passkey creata sul dispositivo. Verifica della firma e salvataggio sicuro sul server…");
+      const verified = await post("/webauthn/master/register/verify", responseBody, grantToken);
+      grantToken = "";
+      if (!verified.verified || !verified.credentialSaved || !verified.grantConsumed) {
+        throw new Error("Il server non ha confermato il salvataggio completo.");
+      }
+      status("PASSKEY MASTER REGISTRATA E VERIFICATA.\nLa credenziale è stata salvata nel database Preview. Puoi chiudere questa pagina.");
+      button.textContent = "Registrazione completata";
+    } catch (error) {
+      grantToken = "";
+      status("Procedura non completata: " + (error && error.message ? error.message : "errore sconosciuto") + "\n\nNon reinserire subito il segreto se la richiesta era già partita: in caso di interruzione attendi cinque minuti e verifica prima lo stato del database.");
+      button.disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>
