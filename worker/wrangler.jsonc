@@ -7,6 +7,11 @@
     "enabled": true
   },
   "preview_urls": true,
+  "vars": {
+    "WEBAUTHN_RP_ID": "brisicche78.github.io",
+    "WEBAUTHN_ORIGIN": "https://brisicche78.github.io",
+    "WEBAUTHN_RP_NAME": "Casa Santini"
+  },
   "d1_databases": [
     {
       "binding": "DB",
