@@ -93,7 +93,7 @@ footer{text-align:center;color:#536b88;font-size:9px;margin-top:28px;letter-spac
   <section id="appView" class="hidden">
     <header>
       <div class="brand"><div class="brandmark"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M5 18.5 20 6l15 12.5V34H5V18.5Z" stroke="currentColor" stroke-width="1.8"/><path d="M14 34V22h12v12M11 17l9-7.5 9 7.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 14v4m-2-2h4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><h1>CASA SANTINI</h1><div id="userLabel" class="sub">Smart home interface</div></div></div>
-      <div class="header-actions"><button id="adminOpen" class="admin-open hidden" type="button">UTENTI</button><div class="connection"><span id="cloudDot" class="dot"></span><span id="cloudText">Connessione…</span></div></div>
+      <div class="header-actions"><button id="adminOpen" class="admin-open hidden" type="button">UTENTI</button><button id="logoutBtn" class="logout" type="button">DISCONNETTI</button><div class="connection"><span id="cloudDot" class="dot"></span><span id="cloudText">Connessione…</span></div></div>
     </header>
     <section id="dashboardView">
     <p class="intro">Controllo ambiente</p>
@@ -170,6 +170,7 @@ function clearSession(){
   $("adminOpen").classList.add("hidden");$("masterAdmin").classList.add("hidden");$("adminView").classList.add("hidden");$("dashboardView").classList.remove("hidden");showApp();
 }
 $("switchLoginMode").addEventListener("click",()=>setLoginMode(loginMode==="master"?"family":"master"));
+$("logoutBtn").addEventListener("click",()=>{clearSession();$("password").value="";$("familyPassword").value="";$("loginError").textContent="";$("familyMessage").textContent="";setLoginMode("master");});
 
 $("loginForm").addEventListener("submit",async e=>{
   e.preventDefault();$("loginError").textContent="Accesso in corso…";
