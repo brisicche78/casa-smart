@@ -149,6 +149,22 @@ async function masterRegistrationOptions(request, env, origin) {
     return json({ error: "La Passkey MASTER è già stata inizializzata" }, 409, origin, env.WEBAUTHN_ORIGIN);
   }
 
+  const consumedSecret = await env.DB.prepare(
+    "SELECT id FROM webauthn_challenges WHERE id = 'master-enrollment-secret-consumed' AND purpose = 'master-enrollment-secret-consumed' LIMIT 1"
+  ).first();
+
+  if (consumedSecret) {
+    return json({ error: "Il segreto di inizializzazione è già stato utilizzato" }, 409, origin, env.WEBAUTHN_ORIGIN);
+  }
+
+  const activeRegistration = await env.DB.prepare(
+    "SELECT id FROM webauthn_challenges WHERE purpose = 'master-registration' AND expires_at > unixepoch() LIMIT 1"
+  ).first();
+
+  if (activeRegistration) {
+    return json({ error: "Esiste già una registrazione in corso. Attendi la scadenza e riprova." }, 409, origin, env.WEBAUTHN_ORIGIN);
+  }
+
   const options = await generateRegistrationOptions({
     rpName: env.WEBAUTHN_RP_NAME,
     rpID: env.WEBAUTHN_RP_ID,
@@ -168,29 +184,20 @@ async function masterRegistrationOptions(request, env, origin) {
   const grantId = crypto.randomUUID();
   const grantToken = randomToken();
   const grantHash = await sha256Hex(grantToken);
-  const enrollmentClaim = randomToken();
 
-  // Consuma l'autorizzazione MASTER al primo avvio riuscito.
-  // Il record permanente impedisce di riutilizzare il segreto anche dopo
-  // la scadenza del grant. La claim casuale rende atomica la gara tra richieste.
-  const enrollmentResults = await env.DB.batch([
+  // Il segreto resta riutilizzabile finché la Passkey non viene verificata
+  // e salvata. Challenge e grant scadono automaticamente dopo cinque minuti.
+  await env.DB.batch([
     env.DB.prepare(
-      "INSERT OR IGNORE INTO webauthn_challenges (id, user_id, challenge, purpose, expires_at) VALUES ('master-enrollment-secret-consumed', ?, ?, 'master-enrollment-secret-consumed', 2147483647)"
-    ).bind(MASTER_ID, enrollmentClaim),
+      "INSERT INTO app_users (id, name, role, status) VALUES (?, 'Alessandro', 'master', 'active') ON CONFLICT(id) DO NOTHING"
+    ).bind(MASTER_ID),
     env.DB.prepare(
-      "INSERT INTO app_users (id, name, role, status) SELECT ?, 'Alessandro', 'master', 'active' WHERE EXISTS (SELECT 1 FROM webauthn_challenges WHERE id = 'master-enrollment-secret-consumed' AND challenge = ? AND purpose = 'master-enrollment-secret-consumed') ON CONFLICT(id) DO NOTHING"
-    ).bind(MASTER_ID, enrollmentClaim),
+      "INSERT INTO webauthn_challenges (id, user_id, challenge, purpose, expires_at) VALUES (?, ?, ?, 'master-registration', unixepoch() + ?)"
+    ).bind(challengeId, MASTER_ID, options.challenge, CHALLENGE_TTL_SECONDS),
     env.DB.prepare(
-      "INSERT INTO webauthn_challenges (id, user_id, challenge, purpose, expires_at) SELECT ?, ?, ?, 'master-registration', unixepoch() + ? WHERE EXISTS (SELECT 1 FROM webauthn_challenges WHERE id = 'master-enrollment-secret-consumed' AND challenge = ? AND purpose = 'master-enrollment-secret-consumed')"
-    ).bind(challengeId, MASTER_ID, options.challenge, CHALLENGE_TTL_SECONDS, enrollmentClaim),
-    env.DB.prepare(
-      "INSERT INTO webauthn_challenges (id, user_id, challenge, purpose, expires_at) SELECT ?, ?, ?, 'master-enrollment-grant', unixepoch() + ? WHERE EXISTS (SELECT 1 FROM webauthn_challenges WHERE id = 'master-enrollment-secret-consumed' AND challenge = ? AND purpose = 'master-enrollment-secret-consumed')"
-    ).bind(grantId, MASTER_ID, grantHash, CHALLENGE_TTL_SECONDS, enrollmentClaim)
+      "INSERT INTO webauthn_challenges (id, user_id, challenge, purpose, expires_at) VALUES (?, ?, ?, 'master-enrollment-grant', unixepoch() + ?)"
+    ).bind(grantId, MASTER_ID, grantHash, CHALLENGE_TTL_SECONDS)
   ]);
-
-  if (Number(enrollmentResults?.[0]?.meta?.changes || 0) !== 1) {
-    return json({ error: "Inizializzazione MASTER già avviata o già consumata" }, 409, origin, env.WEBAUTHN_ORIGIN);
-  }
 
   return json({
     ok: true,
@@ -290,7 +297,7 @@ async function verifyMasterRegistration(request, env, origin) {
   // effettivamente salvata; una verifica fallita lascia scadere il grant.
   const results = await env.DB.batch([
     env.DB.prepare(
-      "INSERT INTO webauthn_credentials (id, user_id, credential_id, public_key, sign_count, transports, device_name) SELECT ?, ?, ?, ?, ?, ?, 'MASTER' WHERE EXISTS (SELECT 1 FROM webauthn_challenges WHERE id = ? AND user_id = ? AND purpose = 'master-registration' AND challenge = ? AND expires_at > unixepoch()) AND EXISTS (SELECT 1 FROM webauthn_challenges WHERE id = ? AND user_id = ? AND challenge = ? AND purpose = 'master-enrollment-grant' AND expires_at > unixepoch()) AND NOT EXISTS (SELECT 1 FROM webauthn_credentials WHERE user_id = ?)"
+      "INSERT INTO webauthn_credentials (id, user_id, credential_id, public_key, sign_count, transports, device_name) SELECT ?, ?, ?, ?, ?, ?, 'MASTER' WHERE EXISTS (SELECT 1 FROM webauthn_challenges WHERE id = ? AND user_id = ? AND purpose = 'master-registration' AND challenge = ? AND expires_at > unixepoch()) AND EXISTS (SELECT 1 FROM webauthn_challenges WHERE id = ? AND user_id = ? AND challenge = ? AND purpose = 'master-enrollment-grant' AND expires_at > unixepoch()) AND NOT EXISTS (SELECT 1 FROM webauthn_credentials WHERE user_id = ?) AND NOT EXISTS (SELECT 1 FROM webauthn_challenges WHERE id = 'master-enrollment-secret-consumed' AND purpose = 'master-enrollment-secret-consumed')"
     ).bind(
       crypto.randomUUID(),
       MASTER_ID,
@@ -306,6 +313,9 @@ async function verifyMasterRegistration(request, env, origin) {
       grantHash,
       MASTER_ID
     ),
+    env.DB.prepare(
+      "INSERT OR IGNORE INTO webauthn_challenges (id, user_id, challenge, purpose, expires_at) SELECT 'master-enrollment-secret-consumed', ?, 'consumed', 'master-enrollment-secret-consumed', 2147483647 WHERE EXISTS (SELECT 1 FROM webauthn_credentials WHERE user_id = ? AND credential_id = ?)"
+    ).bind(MASTER_ID, MASTER_ID, credential.id),
     env.DB.prepare(
       "DELETE FROM webauthn_challenges WHERE ((id = ? AND user_id = ? AND purpose = 'master-registration') OR (id = ? AND user_id = ? AND purpose = 'master-enrollment-grant')) AND EXISTS (SELECT 1 FROM webauthn_credentials WHERE user_id = ? AND credential_id = ?)"
     ).bind(body.challengeId, MASTER_ID, body.grantId, MASTER_ID, MASTER_ID, credential.id)
