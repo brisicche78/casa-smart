@@ -32,7 +32,7 @@ let sessionToken="";
 const status=m=>statusBox.textContent=m;
 function decodeBase64url(v){const p=v.replace(/-/g,"+").replace(/_/g,"/")+"=".repeat((4-v.length%4)%4),b=atob(p),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a.buffer}
 function encodeBase64url(buffer){const a=new Uint8Array(buffer);let b="";for(let i=0;i<a.length;i++)b+=String.fromCharCode(a[i]);return btoa(b).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"")}
-async function post(path,payload){const r=await fetch(API+path,{method:"POST",headers:payload?{"Content-Type":"application/json"}:{},body:payload?JSON.stringify(payload):undefined,cache:"no-store",credentials:"omit",referrerPolicy:"no-referrer"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||("Errore HTTP "+r.status));return d}
+async function post(path,payload,token){const headers={};if(payload)headers["Content-Type"]="application/json";if(token)headers["Authorization"]="Bearer "+token;const r=await fetch(API+path,{method:"POST",headers,body:payload?JSON.stringify(payload):undefined,cache:"no-store",credentials:"omit",referrerPolicy:"no-referrer"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||("Errore HTTP "+r.status));return d}
 async function checkSession(token){const r=await fetch(API+"/webauthn/master/session",{method:"GET",headers:{"Authorization":"Bearer "+token},cache:"no-store",credentials:"omit",referrerPolicy:"no-referrer"});const d=await r.json().catch(()=>({}));if(!r.ok||!d.authenticated)throw new Error("Sessione non valida dopo l'autenticazione.");return d}
 button.addEventListener("click",async()=>{
 if(button.disabled)return;
