@@ -761,7 +761,7 @@ async function familyRegistrationOptions(request, env, origin) {
   if (!(await checkFamilyRateLimit(request,env))) return json({error:"Troppi tentativi. Riprova più tardi."},429,origin,env.WEBAUTHN_ORIGIN);
   let body;
   try { body = await readJson(request); } catch { return json({error:"Richiesta non valida"},400,origin,env.WEBAUTHN_ORIGIN); }
-  const name = typeof body.name === "string" ? body.name.trim().replace(/\\s+/g," ").slice(0,50) : "";
+  const name = typeof body.name === "string" ? body.name.trim().replace(/\s+/g," ").slice(0,50) : "";
   if (name.length < 2) return json({error:"Inserisci il nome del familiare (almeno 2 caratteri)."},400,origin,env.WEBAUTHN_ORIGIN);
   const existing = await env.DB.prepare(
     "SELECT id, status FROM app_users WHERE role = 'family' AND lower(name) = lower(?) AND status IN ('pending','active') LIMIT 1"
@@ -826,7 +826,7 @@ async function familyAuthenticationOptions(request, env, origin) {
   if (!(await checkFamilyRateLimit(request,env))) return json({error:"Troppi tentativi. Riprova più tardi."},429,origin,env.WEBAUTHN_ORIGIN);
   let body;
   try { body=await readJson(request); } catch { return json({error:"Richiesta non valida"},400,origin,env.WEBAUTHN_ORIGIN); }
-  const name=typeof body.name==="string"?body.name.trim().replace(/\\s+/g," ").slice(0,50):"";
+  const name=typeof body.name==="string"?body.name.trim().replace(/\s+/g," ").slice(0,50):"";
   if (!name) return json({error:"Inserisci il nome."},400,origin,env.WEBAUTHN_ORIGIN);
   const user=await env.DB.prepare("SELECT id,name,status FROM app_users WHERE role='family' AND lower(name)=lower(?) LIMIT 1").bind(name).first();
   if (!user || user.status!=="active") return json({error:"Accesso non ancora autorizzato. Se hai appena inviato la richiesta, attendi l'approvazione del MASTER."},403,origin,env.WEBAUTHN_ORIGIN);
