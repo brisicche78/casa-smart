@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta http-equiv="Cache-Control" content="no-store">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#090f1c">
+<title>Casa Santini · Preview Passkey</title>
+<style>
+:root{color-scheme:dark;--bg:#050914;--panel:#0c1425;--line:#203452;--muted:#91a5c2;--cyan:#54e7ff;--green:#48f0bd;--red:#ff668c;--amber:#ffd36a;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -12%,#19365d 0%,#0b1427 38%,#050914 76%);color:#eef7ff}
+main{width:min(100% - 28px,520px);margin:0 auto;padding:28px 0 calc(36px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;gap:13px;margin:6px 2px 26px}.mark{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:#102b45;border:1px solid #28658a;color:var(--cyan);font-size:24px}
+h1{font-size:21px;letter-spacing:1.5px;margin:0}.sub{font-size:10px;color:#91a5c2;letter-spacing:1.5px;text-transform:uppercase;margin-top:5px}
+.card{background:linear-gradient(145deg,#101e33f5,#091323f7);border:1px solid #203955;border-radius:21px;padding:20px;margin:13px 0;box-shadow:0 16px 42px #0005}
+h2{font-size:16px;margin:0 0 8px}.muted{font-size:12px;color:var(--muted);line-height:1.6}
+button{width:100%;padding:14px;border:0;border-radius:13px;font:inherit;font-size:12px;font-weight:800;letter-spacing:.7px;cursor:pointer;margin-top:12px;background:linear-gradient(100deg,#087cae,#426ff0);color:white}
+button.secondary{background:#14243a;border:1px solid #2b4968;color:#c8e4ff}button:disabled{opacity:.5;cursor:wait}input{width:100%;margin:8px 0 2px;padding:14px;border:1px solid #2b4968;border-radius:12px;background:#081323;color:#eef7ff;font:inherit;font-size:13px}.family-row{padding:12px 0;border-top:1px solid var(--line)}.family-row strong{display:block;font-size:13px}.family-row small{display:block;color:var(--muted);font-size:10px;margin-top:4px}.family-actions{display:flex;gap:8px}.family-actions button{flex:1;padding:10px 6px;font-size:10px}
+#status{min-height:54px;padding:12px;border-radius:12px;background:#081323;color:#c8d7ef;font-size:12px;line-height:1.6;white-space:pre-wrap;margin-top:15px}
+.banner{border:1px solid #75603b;background:#30251655;color:#ffe0a0;padding:12px;border-radius:12px;font-size:11px;line-height:1.55;margin:14px 0}
+.pill{display:inline-block;padding:5px 9px;border-radius:20px;background:#26334a;color:#b8c9df;font-size:9px;letter-spacing:.7px;text-transform:uppercase}
+.pill.ok{background:#123d36;color:#8fffd7}.device{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px solid var(--line)}.device:first-of-type{border-top:0}.device strong{font-size:13px}.device small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+.device button{width:auto;min-width:112px;margin:0;padding:9px 12px;background:#14243a;border:1px solid #2b4563;color:#c8e4ff}.device button:disabled{opacity:.6}.device-state{display:block}
+.hidden{display:none!important}footer{text-align:center;color:#637995;font-size:9px;letter-spacing:1.5px;margin-top:24px}
+</style>
+</head>
+<body>
+<main>
+<header><div class="mark">⌂</div><div><h1>CASA SANTINI</h1><div class="sub">Preview · Accesso MASTER</div></div></header>
+<section id="login" class="card">
+<h2>Accesso con Passkey</h2>
+<p class="muted">Accedi con la Passkey MASTER registrata. Puoi usare Windows Hello, PIN, impronta o il metodo supportato dal tuo dispositivo.</p>
+<button id="loginBtn" type="button">ACCEDI CON PASSKEY</button>
+<div id="status" role="status" aria-live="polite">Controllo della sessione in corso…</div>
+<div class="banner"><strong>ACCESSO FAMILIARE</strong><br>Ogni familiare può registrare la propria Passkey. L'accesso sarà attivato solo dopo la tua approvazione MASTER.</div>
+<div class="card" id="familyAccess">
+<h2>Familiari</h2>
+<label class="muted" for="familyName">Nome e cognome</label>
+<input id="familyName" type="text" maxlength="50" autocomplete="name" placeholder="Es. Mario Rossi">
+<button id="familyRegisterBtn" type="button">RICHIEDI ACCESSO CON PASSKEY</button>
+<button id="familyLoginBtn" class="secondary" type="button">ACCEDI COME FAMILIARE</button>
+<div id="familyStatus" class="muted" role="status" aria-live="polite" style="margin-top:12px;white-space:pre-wrap">La richiesta viene inviata al MASTER per l'approvazione.</div>
+</div></section>
+<section id="dashboard" class="hidden">
+<div class="card">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><h2>Accesso MASTER attivo</h2><div class="muted" id="userInfo">Sessione verificata</div></div><span class="pill ok">Autenticato</span></div>
+<p class="muted" id="expiryInfo">Sessione rinnovata durante l'utilizzo.</p>
+<button id="logoutBtn" class="secondary" type="button">DISCONNETTI · REVOCA SESSIONE</button>
+</div>
+<div class="banner"><strong>AMBIENTE DI PROVA</strong><br>La verifica Passkey e la sessione sono collegate al Worker e al database Preview. I comandi qui sotto sono simulati soltanto nel browser: nessuna richiesta viene inviata agli Shelly o alla produzione.</div>
+<div class="card">
+<h2>Dispositivi Casa Santini</h2>
+<div class="device" data-device="gate"><div><strong>Cancello</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Pronto</small></div><button type="button" data-action="pulse">SIMULA APERTURA</button></div>
+<div class="device" data-device="yard"><div><strong>Faretti piazzale</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Spenti</small></div><button type="button" data-action="toggle">ACCENDI</button></div>
+<div class="device" data-device="stairs"><div><strong>Lampioncino scale</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Spento</small></div><button type="button" data-action="toggle">ACCENDI</button></div>
+</div>
+<div class="card" id="familyAdmin">
+<h2>Gestione familiari</h2><p class="muted">Approva le richieste oppure revoca un accesso già autorizzato.</p>
+<div class="device"><div><strong>Richieste in attesa</strong><small id="requestCount">—</small></div><button id="refreshFamilyBtn" type="button">AGGIORNA</button></div>
+<div id="familyRequests" class="muted">Caricamento…</div>
+<div class="device"><div><strong>Familiari autorizzati</strong><small id="userCount">—</small></div></div>
+<div id="familyUsers" class="muted">Caricamento…</div><div id="familyAdminStatus" class="muted" role="status" style="margin-top:12px;white-space:pre-wrap"></div>
+</div>
+
+</section>
+<section class="hidden" id="familyHome">
+<div class="card">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><h2>Casa Santini</h2><div class="muted" id="familyWelcome">Sessione verificata.</div></div><span class="pill ok">Familiare</span></div>
+<button id="familyLogoutBtn" class="secondary" type="button">DISCONNETTI</button>
+</div>
+<div class="banner"><strong>AMBIENTE DI PROVA</strong><br>Puoi visualizzare i dispositivi. I comandi sono simulati soltanto nel browser e non comunicano con gli Shelly reali.</div>
+<div class="card">
+<h2>Dispositivi Casa Santini</h2>
+<div class="device" data-device="gate"><div><strong>Cancello</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Pronto</small></div><button type="button" data-action="pulse">SIMULA APERTURA</button></div>
+<div class="device" data-device="yard"><div><strong>Faretti piazzale</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Spenti</small></div><button type="button" data-action="toggle">ACCENDI</button></div>
+<div class="device" data-device="stairs"><div><strong>Lampioncino scale</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Spento</small></div><button type="button" data-action="toggle">ACCENDI</button></div>
+</div>
+</section>
+<footer>CASA SANTINI · WEBAUTHN PREVIEW · PRODUZIONE NON COLLEGATA</footer>
+</main>
+<script>
+(() => {
+"use strict";
+const API="https://b1ecd5c6-casa-smart-api-webauthn-preview.brisicche78.workers.dev";
+const $=id=>document.getElementById(id);
+let token="",heartbeat=null,busy=false;
+function message(value){$("status").textContent=value}
+function decodeBase64url(value){const padded=value.replace(/-/g,"+").replace(/_/g,"/")+"=".repeat((4-value.length%4)%4);const binary=atob(padded);const bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return bytes.buffer}
+function encodeBase64url(buffer){const bytes=new Uint8Array(buffer);let binary="";for(let i=0;i<bytes.length;i++)binary+=String.fromCharCode(bytes[i]);return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"")}
+function openStore(){return new Promise((resolve,reject)=>{const request=indexedDB.open("casa-santini-auth-preview",1);request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains("session"))request.result.createObjectStore("session")};request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
+async function saveToken(value){const db=await openStore();await new Promise((resolve,reject)=>{const tx=db.transaction("session","readwrite");tx.objectStore("session").put(value,"master-token");tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()}
+async function readToken(){const db=await openStore();const value=await new Promise((resolve,reject)=>{const tx=db.transaction("session","readonly");const req=tx.objectStore("session").get("master-token");req.onsuccess=()=>resolve(req.result||"");req.onerror=()=>reject(req.error)});db.close();return value}
+async function clearToken(){const db=await openStore();await new Promise((resolve,reject)=>{const tx=db.transaction("session","readwrite");tx.objectStore("session").delete("master-token");tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close();token=""}
+async function request(path,{method="POST",body=null,bearer=""}={}){const headers={};if(body!==null)headers["Content-Type"]="application/json";if(bearer)headers.Authorization="Bearer "+bearer;const response=await fetch(API+path,{method,headers,body:body===null?undefined:JSON.stringify(body),cache:"no-store",credentials:"omit",referrerPolicy:"no-referrer"});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||("Errore HTTP "+response.status));return data}
+async function verifySession(value){const data=await request("/webauthn/master/session",{method:"GET",bearer:value});if(!data.authenticated||data.role!=="master")throw new Error("Sessione MASTER non valida.");return data}
+function showAuthenticated(data){$("login").classList.add("hidden");$("dashboard").classList.remove("hidden");$("userInfo").textContent=(data.user||"MASTER")+" · Sessione verificata dal server";$("expiryInfo").textContent="Durata mobile: 30 giorni dall'ultima verifica valida. La sessione viene rinnovata durante l'utilizzo."}
+function showLogin(text){$("dashboard").classList.add("hidden");$("login").classList.remove("hidden");if(text)message(text)}
+async function login(){
+if(busy)return;busy=true;$("loginBtn").disabled=true;
+try{
+if(!window.isSecureContext||!navigator.credentials?.get)throw new Error("Passkey non supportata da questo browser o contesto.");
+message("Contatto il Worker Preview…");
+const prepared=await request("/webauthn/master/authenticate/options");
+if(!prepared.challengeId||!prepared.options)throw new Error("Risposta di autenticazione incompleta.");
+const options=prepared.options;options.challenge=decodeBase64url(options.challenge);
+if(Array.isArray(options.allowCredentials))options.allowCredentials=options.allowCredentials.map(item=>({...item,id:decodeBase64url(item.id)}));
+message("Conferma l'accesso con Windows Hello o con la Passkey…");
+const credential=await navigator.credentials.get({publicKey:options});if(!credential)throw new Error("Autenticazione annullata.");
+const a=credential.response;
+const response={id:credential.id,rawId:encodeBase64url(credential.rawId),type:credential.type,response:{authenticatorData:encodeBase64url(a.authenticatorData),clientDataJSON:encodeBase64url(a.clientDataJSON),signature:encodeBase64url(a.signature),userHandle:a.userHandle?encodeBase64url(a.userHandle):null},clientExtensionResults:credential.getClientExtensionResults(),authenticatorAttachment:credential.authenticatorAttachment||null};
+message("Firma ricevuta. Verifica in corso sul server…");
+const verified=await request("/webauthn/master/authenticate/verify",{body:{challengeId:prepared.challengeId,response}});
+if(!verified.verified||verified.role!=="master"||!verified.sessionToken)throw new Error("Il server non ha confermato l'accesso MASTER.");
+await verifySession(verified.sessionToken);await saveToken(verified.sessionToken);token=verified.sessionToken;
+showAuthenticated({user:verified.user});startHeartbeat();message("Accesso Passkey riuscito. Sessione salvata in IndexedDB e confermata dal server Preview.");
+}catch(error){message("Accesso non completato: "+(error.message||"errore sconosciuto"));}finally{busy=false;$("loginBtn").disabled=false}
+}
+async function renew(){
+if(!token)return;
+try{const data=await verifySession(token);showAuthenticated(data)}catch(error){await clearToken();stopHeartbeat();showLogin("Sessione scaduta o revocata. Accedi nuovamente con la Passkey.")}
+}
+function startHeartbeat(){stopHeartbeat();heartbeat=setInterval(()=>{if(document.visibilityState==="visible")renew()},10*60*1000)}
+function stopHeartbeat(){if(heartbeat){clearInterval(heartbeat);heartbeat=null}}
+async function logout(){
+if(!token||busy)return;busy=true;$("logoutBtn").disabled=true;
+try{
+const result=await request("/webauthn/master/logout",{bearer:token});
+if(!result.ok||!result.revoked)throw new Error("Il server non ha confermato la revoca.");
+let stillValid=true;try{await verifySession(token)}catch{stillValid=false}
+if(stillValid)throw new Error("La sessione risulta ancora valida dopo la revoca.");
+await clearToken();stopHeartbeat();showLogin("Logout riuscito. Sessione revocata dal server Preview; il token non è più valido.");
+}catch(error){$("expiryInfo").textContent="Logout non verificato: "+(error.message||"errore");}finally{busy=false;$("logoutBtn").disabled=false}
+}
+$("loginBtn").addEventListener("click",login);$("logoutBtn").addEventListener("click",logout);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&token)renew()});
+(async()=>{
+try{token=await readToken();if(!token){showLogin("Nessuna sessione salvata. Accedi con la Passkey MASTER.");return}const data=await verifySession(token);showAuthenticated(data);startHeartbeat();message("Sessione precedente ripristinata e verificata dal server Preview.");}
+catch(error){try{await clearToken()}catch{}showLogin("Sessione non valida o scaduta. Accedi nuovamente con la Passkey.")}
+})();
+})();
+</script>
+<script src="./family-preview.js"></script>\n<script src="./preview-devices.js"></script>
+</body>
+</html>
