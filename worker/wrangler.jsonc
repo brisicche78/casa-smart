@@ -10,7 +10,9 @@
   "vars": {
     "WEBAUTHN_RP_ID": "brisicche78.github.io",
     "WEBAUTHN_ORIGIN": "https://brisicche78.github.io",
-    "WEBAUTHN_RP_NAME": "Casa Santini"
+    "WEBAUTHN_RP_NAME": "Casa Santini",
+    "SHELLY_READ_ENABLED": "false",
+    "SHELLY_CONTROL_ENABLED": "false"
   },
   "d1_databases": [
     {
