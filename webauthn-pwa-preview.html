@@ -22,7 +22,7 @@ button.secondary{background:#14243a;border:1px solid #2b4968;color:#c8e4ff}butto
 .banner{border:1px solid #75603b;background:#30251655;color:#ffe0a0;padding:12px;border-radius:12px;font-size:11px;line-height:1.55;margin:14px 0}
 .pill{display:inline-block;padding:5px 9px;border-radius:20px;background:#26334a;color:#b8c9df;font-size:9px;letter-spacing:.7px;text-transform:uppercase}
 .pill.ok{background:#123d36;color:#8fffd7}.device{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px solid var(--line)}.device:first-of-type{border-top:0}.device strong{font-size:13px}.device small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
-.device button{width:auto;min-width:95px;margin:0;padding:9px 12px;background:#14243a;border:1px solid #2b4563;color:#8fa4c0}
+.device button{width:auto;min-width:112px;margin:0;padding:9px 12px;background:#14243a;border:1px solid #2b4563;color:#c8e4ff}.device button:disabled{opacity:.6}.device-state{display:block}
 .hidden{display:none!important}footer{text-align:center;color:#637995;font-size:9px;letter-spacing:1.5px;margin-top:24px}
 </style>
 </head>
@@ -49,12 +49,12 @@ button.secondary{background:#14243a;border:1px solid #2b4968;color:#c8e4ff}butto
 <p class="muted" id="expiryInfo">Sessione rinnovata durante l'utilizzo.</p>
 <button id="logoutBtn" class="secondary" type="button">DISCONNETTI · REVOCA SESSIONE</button>
 </div>
-<div class="banner"><strong>AMBIENTE DI PROVA</strong><br>La verifica Passkey e la sessione sono collegate al Worker e al database Preview. I comandi Shelly sono intenzionalmente disattivati: questa pagina non invia richieste al sistema domotico di produzione.</div>
+<div class="banner"><strong>AMBIENTE DI PROVA</strong><br>La verifica Passkey e la sessione sono collegate al Worker e al database Preview. I comandi qui sotto sono simulati soltanto nel browser: nessuna richiesta viene inviata agli Shelly o alla produzione.</div>
 <div class="card">
 <h2>Dispositivi Casa Santini</h2>
-<div class="device"><div><strong>Cancello</strong><small>Accesso automatico · comando disabilitato</small></div><button disabled>PREVIEW</button></div>
-<div class="device"><div><strong>Faretti piazzale</strong><small>Illuminazione esterna · comando disabilitato</small></div><button disabled>PREVIEW</button></div>
-<div class="device"><div><strong>Lampioncino scale</strong><small>Luce ingresso · comando disabilitato</small></div><button disabled>PREVIEW</button></div>
+<div class="device" data-device="gate"><div><strong>Cancello</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Pronto</small></div><button type="button" data-action="pulse">SIMULA APERTURA</button></div>
+<div class="device" data-device="yard"><div><strong>Faretti piazzale</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Spenti</small></div><button type="button" data-action="toggle">ACCENDI</button></div>
+<div class="device" data-device="stairs"><div><strong>Lampioncino scale</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Spento</small></div><button type="button" data-action="toggle">ACCENDI</button></div>
 </div>
 <div class="card" id="familyAdmin">
 <h2>Gestione familiari</h2><p class="muted">Approva le richieste oppure revoca un accesso già autorizzato.</p>
@@ -70,12 +70,12 @@ button.secondary{background:#14243a;border:1px solid #2b4968;color:#c8e4ff}butto
 <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><h2>Casa Santini</h2><div class="muted" id="familyWelcome">Sessione verificata.</div></div><span class="pill ok">Familiare</span></div>
 <button id="familyLogoutBtn" class="secondary" type="button">DISCONNETTI</button>
 </div>
-<div class="banner"><strong>AMBIENTE DI PROVA</strong><br>Puoi visualizzare i dispositivi. I comandi sono disabilitati e questa pagina non comunica con gli Shelly reali.</div>
+<div class="banner"><strong>AMBIENTE DI PROVA</strong><br>Puoi visualizzare i dispositivi. I comandi sono simulati soltanto nel browser e non comunicano con gli Shelly reali.</div>
 <div class="card">
 <h2>Dispositivi Casa Santini</h2>
-<div class="device"><div><strong>Cancello</strong><small>Accesso automatico · comando disabilitato</small></div><button disabled>PREVIEW</button></div>
-<div class="device"><div><strong>Faretti piazzale</strong><small>Illuminazione esterna · comando disabilitato</small></div><button disabled>PREVIEW</button></div>
-<div class="device"><div><strong>Lampioncino scale</strong><small>Luce ingresso · comando disabilitato</small></div><button disabled>PREVIEW</button></div>
+<div class="device" data-device="gate"><div><strong>Cancello</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Pronto</small></div><button type="button" data-action="pulse">SIMULA APERTURA</button></div>
+<div class="device" data-device="yard"><div><strong>Faretti piazzale</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Spenti</small></div><button type="button" data-action="toggle">ACCENDI</button></div>
+<div class="device" data-device="stairs"><div><strong>Lampioncino scale</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Spento</small></div><button type="button" data-action="toggle">ACCENDI</button></div>
 </div>
 </section>
 <footer>CASA SANTINI · WEBAUTHN PREVIEW · PRODUZIONE NON COLLEGATA</footer>
@@ -141,6 +141,6 @@ catch(error){try{await clearToken()}catch{}showLogin("Sessione non valida o scad
 })();
 })();
 </script>
-<script src="./family-preview.js"></script>
+<script src="./family-preview.js"></script>\n<script src="./preview-devices.js"></script>
 </body>
 </html>
