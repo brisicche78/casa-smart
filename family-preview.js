@@ -1,6 +1,6 @@
 (() => {
 "use strict";
-const API = "https://6bb5d172-casa-smart-api-webauthn-preview.brisicche78.workers.dev";
+const API = "https://b1ecd5c6-casa-smart-api-webauthn-preview.brisicche78.workers.dev";
 const $ = id => document.getElementById(id);
 const decode = value => {
   const padded = value.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - value.length % 4) % 4);
