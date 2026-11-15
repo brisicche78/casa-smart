@@ -65,7 +65,19 @@ button.secondary{background:#14243a;border:1px solid #2b4968;color:#c8e4ff}butto
 </div>
 
 </section>
-<div class="card hidden" id="familyHome"><h2>Accesso familiare attivo</h2><p class="muted" id="familyWelcome">Sessione verificata.</p><button id="familyLogoutBtn" class="secondary" type="button">DISCONNETTI</button></div>
+<section class="hidden" id="familyHome">
+<div class="card">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><h2>Casa Santini</h2><div class="muted" id="familyWelcome">Sessione verificata.</div></div><span class="pill ok">Familiare</span></div>
+<button id="familyLogoutBtn" class="secondary" type="button">DISCONNETTI</button>
+</div>
+<div class="banner"><strong>AMBIENTE DI PROVA</strong><br>Puoi visualizzare i dispositivi. I comandi sono disabilitati e questa pagina non comunica con gli Shelly reali.</div>
+<div class="card">
+<h2>Dispositivi Casa Santini</h2>
+<div class="device"><div><strong>Cancello</strong><small>Accesso automatico · comando disabilitato</small></div><button disabled>PREVIEW</button></div>
+<div class="device"><div><strong>Faretti piazzale</strong><small>Illuminazione esterna · comando disabilitato</small></div><button disabled>PREVIEW</button></div>
+<div class="device"><div><strong>Lampioncino scale</strong><small>Luce ingresso · comando disabilitato</small></div><button disabled>PREVIEW</button></div>
+</div>
+</section>
 <footer>CASA SANTINI · WEBAUTHN PREVIEW · PRODUZIONE NON COLLEGATA</footer>
 </main>
 <script>
