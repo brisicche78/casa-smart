@@ -493,6 +493,139 @@ async function verifyMasterAuthentication(request, env, origin) {
 }
 
 
+
+
+// --- Shelly Cloud integration (Preview only; disabled by default) ---
+const SHELLY_DEVICES = {
+  "441793cd4e78": { name: "Cancello", kind: "gate" },
+  "ccba97d87ba0": { name: "Faretti piazzale", kind: "light" },
+  "a8032abb2468": { name: "Lampioncino scale", kind: "light" }
+};
+
+async function getActiveFamilySession(request, env) {
+  const authorization = request.headers.get("Authorization") || "";
+  const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
+  if (!token || token.length > 256) return null;
+  await ensureSessionTable(env);
+  const tokenHash = await sha256Hex(token);
+  const session = await env.DB.prepare(
+    "SELECT s.id, u.id AS user_id, u.name, u.role FROM webauthn_sessions s JOIN app_users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > unixepoch() AND s.revoked_at IS NULL AND u.status = 'active' AND u.role = 'family'"
+  ).bind(tokenHash).first();
+  if (!session) return null;
+  await env.DB.prepare(
+    "UPDATE webauthn_sessions SET last_used_at = unixepoch(), expires_at = unixepoch() + 2592000 WHERE id = ? AND revoked_at IS NULL"
+  ).bind(session.id).run();
+  return session;
+}
+
+async function getActiveDeviceSession(request, env) {
+  return await getActiveMasterSession(request, env) ||
+    await getActiveFamilySession(request, env);
+}
+
+function shellyApiBase(env) {
+  if (!env.SHELLY_HOST || !env.SHELLY_AUTH_KEY) return null;
+  const rawHost = String(env.SHELLY_HOST).trim();
+  let parsed;
+  try {
+    parsed = new URL(/^https:\/\//i.test(rawHost) ? rawHost : "https://" + rawHost);
+  } catch {
+    return null;
+  }
+  if (parsed.protocol !== "https:" || parsed.username || parsed.password ||
+      parsed.pathname !== "/" || parsed.search || parsed.hash) return null;
+  return parsed.origin;
+}
+
+async function callShellyCloud(env, path, body) {
+  const base = shellyApiBase(env);
+  if (!base) throw new Error("Configurazione Shelly Preview incompleta");
+  const url = new URL(path, base);
+  url.searchParams.set("auth_key", env.SHELLY_AUTH_KEY);
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(10000)
+  });
+  if (!response.ok) throw new Error("Servizio Shelly non disponibile");
+  const data = await response.json();
+  if (data && data.isok === false) throw new Error("Shelly ha rifiutato la richiesta");
+  return data;
+}
+
+async function shellyDeviceStatus(request, env, origin) {
+  if (!allowedRequestOrigin(request, env)) {
+    return json({ error: "Origine non autorizzata" }, 403, origin, env.WEBAUTHN_ORIGIN);
+  }
+  const session = await getActiveDeviceSession(request, env);
+  if (!session) return json({ error: "Sessione non valida. Accedi nuovamente." }, 401, origin, env.WEBAUTHN_ORIGIN);
+  if (env.SHELLY_READ_ENABLED !== "true") {
+    return json({ error: "Lettura Shelly disattivata nel Preview.", shellyEnabled: false }, 503, origin, env.WEBAUTHN_ORIGIN);
+  }
+  try {
+    const result = await callShellyCloud(env, "/v2/devices/api/get", {
+      ids: Object.keys(SHELLY_DEVICES),
+      select: ["status"]
+    });
+    if (!Array.isArray(result)) {
+      return json({ error: "Risposta Shelly non riconosciuta." }, 502, origin, env.WEBAUTHN_ORIGIN);
+    }
+    const devices = Object.keys(SHELLY_DEVICES).map(id => {
+      const found = result.find(item => item && item.id === id);
+      return {
+        id,
+        name: SHELLY_DEVICES[id].name,
+        kind: SHELLY_DEVICES[id].kind,
+        online: found ? found.online === 1 : false,
+        status: found && found.status && typeof found.status === "object" ? found.status : null,
+        available: Boolean(found)
+      };
+    });
+    return json({ ok: true, devices, source: "shelly-cloud" }, 200, origin, env.WEBAUTHN_ORIGIN);
+  } catch {
+    return json({ error: "Non è stato possibile leggere lo stato degli Shelly." }, 502, origin, env.WEBAUTHN_ORIGIN);
+  }
+}
+
+async function shellyDeviceSwitch(request, env, origin) {
+  if (!allowedRequestOrigin(request, env)) {
+    return json({ error: "Origine non autorizzata" }, 403, origin, env.WEBAUTHN_ORIGIN);
+  }
+  const session = await getActiveDeviceSession(request, env);
+  if (!session) return json({ error: "Sessione non valida. Accedi nuovamente." }, 401, origin, env.WEBAUTHN_ORIGIN);
+  if (env.SHELLY_CONTROL_ENABLED !== "true") {
+    return json({ error: "Comandi Shelly disattivati nel Preview.", shellyEnabled: false }, 503, origin, env.WEBAUTHN_ORIGIN);
+  }
+  let body;
+  try { body = await readJson(request); }
+  catch { return json({ error: "Richiesta non valida." }, 400, origin, env.WEBAUTHN_ORIGIN); }
+
+  if (typeof body.id !== "string" || !Object.prototype.hasOwnProperty.call(SHELLY_DEVICES, body.id)) {
+    return json({ error: "Dispositivo non autorizzato." }, 400, origin, env.WEBAUTHN_ORIGIN);
+  }
+  const device = SHELLY_DEVICES[body.id];
+  const command = { id: body.id, channel: 0 };
+
+  if (device.kind === "gate") {
+    if (body.pulse !== true) return json({ error: "Il cancello accetta soltanto un impulso di apertura." }, 400, origin, env.WEBAUTHN_ORIGIN);
+    command.on = true;
+    command.toggle_after = 1;
+  } else {
+    if (typeof body.on !== "boolean" || body.pulse === true) {
+      return json({ error: "Comando luce non valido." }, 400, origin, env.WEBAUTHN_ORIGIN);
+    }
+    command.on = body.on;
+  }
+
+  try {
+    const result = await callShellyCloud(env, "/v2/devices/api/set/switch", command);
+    return json({ ok: true, deviceId: body.id, result }, 200, origin, env.WEBAUTHN_ORIGIN);
+  } catch {
+    return json({ error: "Il comando Shelly non è stato confermato." }, 502, origin, env.WEBAUTHN_ORIGIN);
+  }
+}
+
 async function getActiveMasterSession(request, env) {
   const authorization = request.headers.get("Authorization") || "";
   const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
@@ -1111,6 +1244,15 @@ export default {
       try { return await familySessionLogout(request,env,origin); }
       catch { return json({error:"Errore durante la chiusura della sessione familiare."},500,origin,env.WEBAUTHN_ORIGIN); }
     }
+    if (request.method === "GET" && url.pathname === "/devices/status") {
+      try { return await shellyDeviceStatus(request, env, origin); }
+      catch { return json({ error: "Errore durante la lettura degli Shelly." }, 500, origin, env.WEBAUTHN_ORIGIN); }
+    }
+    if (request.method === "POST" && url.pathname === "/devices/switch") {
+      try { return await shellyDeviceSwitch(request, env, origin); }
+      catch { return json({ error: "Errore durante il comando Shelly." }, 500, origin, env.WEBAUTHN_ORIGIN); }
+    }
+
     if (request.method === "GET" && url.pathname === "/admin/family/requests") {
       try { return await masterFamilyList(request,env,origin,"pending"); }
       catch { return json({error:"Errore nel caricamento delle richieste."},500,origin,env.WEBAUTHN_ORIGIN); }
