@@ -4,7 +4,9 @@
 
 import {
   generateRegistrationOptions,
-  verifyRegistrationResponse
+  verifyRegistrationResponse,
+  generateAuthenticationOptions,
+  verifyAuthenticationResponse
 } from "@simplewebauthn/server";
 
 const MASTER_ID = "master";
@@ -337,6 +339,182 @@ async function verifyMasterRegistration(request, env, origin) {
   }, 200, origin, env.WEBAUTHN_ORIGIN);
 }
 
+
+async function ensureSessionTable(env) {
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS webauthn_sessions (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, token_hash TEXT NOT NULL UNIQUE, challenge_id TEXT NOT NULL UNIQUE, expires_at INTEGER NOT NULL, created_at INTEGER NOT NULL DEFAULT (unixepoch()), last_used_at INTEGER, revoked_at INTEGER, FOREIGN KEY (user_id) REFERENCES app_users(id))"
+  ).run();
+}
+
+async function masterAuthenticationOptions(request, env, origin) {
+  if (!allowedRequestOrigin(request, env)) {
+    return json({ error: "Origine non autorizzata" }, 403, origin, env.WEBAUTHN_ORIGIN);
+  }
+  if (!(await checkRateLimit(request, env))) {
+    return json({ error: "Troppi tentativi. Riprova più tardi." }, 429, origin, env.WEBAUTHN_ORIGIN);
+  }
+  if (!env.WEBAUTHN_RP_ID || !env.WEBAUTHN_ORIGIN) {
+    return json({ error: "Configurazione WebAuthn incompleta" }, 500, origin, env.WEBAUTHN_ORIGIN);
+  }
+
+  const master = await env.DB.prepare(
+    "SELECT id, name, role, status FROM app_users WHERE id = ?"
+  ).bind(MASTER_ID).first();
+  if (!master || master.role !== "master" || master.status !== "active") {
+    return json({ error: "Account MASTER non disponibile" }, 403, origin, env.WEBAUTHN_ORIGIN);
+  }
+
+  const credentials = await env.DB.prepare(
+    "SELECT credential_id, transports FROM webauthn_credentials WHERE user_id = ? AND revoked_at IS NULL"
+  ).bind(MASTER_ID).all();
+  const rows = credentials.results || [];
+  if (!rows.length) {
+    return json({ error: "Nessuna Passkey MASTER attiva" }, 404, origin, env.WEBAUTHN_ORIGIN);
+  }
+
+  await ensureSessionTable(env);
+  const options = await generateAuthenticationOptions({
+    rpID: env.WEBAUTHN_RP_ID,
+    timeout: 60000,
+    userVerification: "required",
+    allowCredentials: rows.map((row) => ({
+      id: row.credential_id,
+      transports: row.transports ? JSON.parse(row.transports) : undefined
+    }))
+  });
+
+  const challengeId = crypto.randomUUID();
+  await env.DB.prepare(
+    "INSERT INTO webauthn_challenges (id, user_id, challenge, purpose, expires_at) VALUES (?, ?, ?, 'master-authentication', unixepoch() + ?)"
+  ).bind(challengeId, MASTER_ID, options.challenge, CHALLENGE_TTL_SECONDS).run();
+
+  return json({ ok: true, challengeId, options }, 200, origin, env.WEBAUTHN_ORIGIN);
+}
+
+async function verifyMasterAuthentication(request, env, origin) {
+  if (!allowedRequestOrigin(request, env)) {
+    return json({ error: "Origine non autorizzata" }, 403, origin, env.WEBAUTHN_ORIGIN);
+  }
+  if (!(await checkRateLimit(request, env))) {
+    return json({ error: "Troppi tentativi. Riprova più tardi." }, 429, origin, env.WEBAUTHN_ORIGIN);
+  }
+
+  let body;
+  try {
+    body = await readJson(request);
+  } catch {
+    return json({ error: "Richiesta JSON non valida" }, 400, origin, env.WEBAUTHN_ORIGIN);
+  }
+  if (
+    typeof body.challengeId !== "string" ||
+    !body.response ||
+    typeof body.response !== "object" ||
+    typeof body.response.id !== "string"
+  ) {
+    return json({ error: "Dati di autenticazione incompleti" }, 400, origin, env.WEBAUTHN_ORIGIN);
+  }
+
+  const challenge = await env.DB.prepare(
+    "SELECT challenge FROM webauthn_challenges WHERE id = ? AND user_id = ? AND purpose = 'master-authentication' AND expires_at > unixepoch()"
+  ).bind(body.challengeId, MASTER_ID).first();
+  if (!challenge) {
+    return json({ error: "Richiesta di accesso scaduta o già utilizzata. Riprova." }, 401, origin, env.WEBAUTHN_ORIGIN);
+  }
+
+  const master = await env.DB.prepare(
+    "SELECT id, name, role, status FROM app_users WHERE id = ?"
+  ).bind(MASTER_ID).first();
+  if (!master || master.role !== "master" || master.status !== "active") {
+    return json({ error: "Account MASTER non disponibile" }, 403, origin, env.WEBAUTHN_ORIGIN);
+  }
+
+  const storedCredential = await env.DB.prepare(
+    "SELECT id, credential_id, public_key, sign_count, transports FROM webauthn_credentials WHERE credential_id = ? AND user_id = ? AND revoked_at IS NULL"
+  ).bind(body.response.id, MASTER_ID).first();
+  if (!storedCredential) {
+    return json({ error: "Passkey non riconosciuta" }, 401, origin, env.WEBAUTHN_ORIGIN);
+  }
+
+  let verification;
+  try {
+    verification = await verifyAuthenticationResponse({
+      response: body.response,
+      expectedChallenge: challenge.challenge,
+      expectedOrigin: env.WEBAUTHN_ORIGIN,
+      expectedRPID: env.WEBAUTHN_RP_ID,
+      credential: {
+        id: storedCredential.credential_id,
+        publicKey: new Uint8Array(storedCredential.public_key),
+        counter: Number(storedCredential.sign_count || 0),
+        transports: storedCredential.transports ? JSON.parse(storedCredential.transports) : undefined
+      },
+      requireUserVerification: true
+    });
+  } catch {
+    return json({ error: "Verifica della Passkey non riuscita" }, 401, origin, env.WEBAUTHN_ORIGIN);
+  }
+  if (!verification.verified) {
+    return json({ error: "Autenticazione Passkey non verificata" }, 401, origin, env.WEBAUTHN_ORIGIN);
+  }
+
+  await ensureSessionTable(env);
+  const sessionToken = randomToken();
+  const tokenHash = await sha256Hex(sessionToken);
+  const sessionId = crypto.randomUUID();
+  const newCounter = Number(verification.authenticationInfo.newCounter || 0);
+
+  try {
+    const results = await env.DB.batch([
+      env.DB.prepare(
+        "INSERT INTO webauthn_sessions (id, user_id, token_hash, challenge_id, expires_at) SELECT ?, ?, ?, ?, unixepoch() + 43200 WHERE EXISTS (SELECT 1 FROM webauthn_challenges WHERE id = ? AND user_id = ? AND challenge = ? AND purpose = 'master-authentication' AND expires_at > unixepoch())"
+      ).bind(sessionId, MASTER_ID, tokenHash, body.challengeId, body.challengeId, MASTER_ID, challenge.challenge),
+      env.DB.prepare(
+        "UPDATE webauthn_credentials SET sign_count = ?, last_used_at = unixepoch() WHERE id = ? AND user_id = ? AND revoked_at IS NULL"
+      ).bind(newCounter, storedCredential.id, MASTER_ID),
+      env.DB.prepare(
+        "DELETE FROM webauthn_challenges WHERE id = ? AND user_id = ? AND purpose = 'master-authentication'"
+      ).bind(body.challengeId, MASTER_ID)
+    ]);
+    if (Number(results?.[0]?.meta?.changes || 0) !== 1) {
+      return json({ error: "Richiesta di accesso già utilizzata. Riprova." }, 401, origin, env.WEBAUTHN_ORIGIN);
+    }
+  } catch {
+    return json({ error: "Impossibile creare la sessione. Riprova ad accedere." }, 500, origin, env.WEBAUTHN_ORIGIN);
+  }
+
+  return json({
+    ok: true,
+    verified: true,
+    user: master.name,
+    role: "master",
+    sessionToken,
+    expiresIn: 43200
+  }, 200, origin, env.WEBAUTHN_ORIGIN);
+}
+
+async function masterSessionStatus(request, env, origin) {
+  if (!allowedRequestOrigin(request, env)) {
+    return json({ error: "Origine non autorizzata" }, 403, origin, env.WEBAUTHN_ORIGIN);
+  }
+  const authorization = request.headers.get("Authorization") || "";
+  const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
+  if (!token || token.length > 256) {
+    return json({ authenticated: false }, 401, origin, env.WEBAUTHN_ORIGIN);
+  }
+  await ensureSessionTable(env);
+  const tokenHash = await sha256Hex(token);
+  const session = await env.DB.prepare(
+    "SELECT s.id, u.name, u.role FROM webauthn_sessions s JOIN app_users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.user_id = ? AND s.expires_at > unixepoch() AND s.revoked_at IS NULL AND u.status = 'active' AND u.role = 'master'"
+  ).bind(tokenHash, MASTER_ID).first();
+  if (!session) {
+    return json({ authenticated: false }, 401, origin, env.WEBAUTHN_ORIGIN);
+  }
+  await env.DB.prepare(
+    "UPDATE webauthn_sessions SET last_used_at = unixepoch() WHERE id = ?"
+  ).bind(session.id).run();
+  return json({ authenticated: true, user: session.name, role: session.role }, 200, origin, env.WEBAUTHN_ORIGIN);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -398,6 +576,31 @@ export default {
         return await verifyMasterRegistration(request, env, origin);
       } catch {
         return json({ error: "Errore interno durante la verifica della Passkey" }, 500, origin, env.WEBAUTHN_ORIGIN);
+      }
+    }
+
+
+    if (request.method === "POST" && url.pathname === "/webauthn/master/authenticate/options") {
+      try {
+        return await masterAuthenticationOptions(request, env, origin);
+      } catch {
+        return json({ error: "Errore interno durante la preparazione dell'accesso" }, 500, origin, env.WEBAUTHN_ORIGIN);
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/webauthn/master/authenticate/verify") {
+      try {
+        return await verifyMasterAuthentication(request, env, origin);
+      } catch {
+        return json({ error: "Errore interno durante la verifica dell'accesso" }, 500, origin, env.WEBAUTHN_ORIGIN);
+      }
+    }
+
+    if (request.method === "GET" && url.pathname === "/webauthn/master/session") {
+      try {
+        return await masterSessionStatus(request, env, origin);
+      } catch {
+        return json({ error: "Errore interno durante il controllo della sessione" }, 500, origin, env.WEBAUTHN_ORIGIN);
       }
     }
 
