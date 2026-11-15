@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive"><meta http-equiv="Cache-Control" content="no-store"><meta name="referrer" content="no-referrer">
+<title>Test accesso Passkey MASTER · Casa Santini</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#090d16;color:#edf2ff}*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 0,#17243c 0,transparent 55%),#090d16}
+main{width:min(100%,480px);padding:28px;border:1px solid #273650;border-radius:20px;background:rgba(15,23,38,.96);box-shadow:0 24px 80px #0008}
+.mark{font-size:12px;letter-spacing:.16em;color:#8da9d6;text-transform:uppercase}h1{font-size:25px;margin:10px 0 8px}p{color:#aebbd0;line-height:1.55}
+button{width:100%;margin-top:16px;padding:14px;border:0;border-radius:12px;background:#78a9ff;color:#07101f;font-weight:750;font-size:15px;cursor:pointer}button:disabled{opacity:.55;cursor:wait}
+#status{min-height:70px;margin-top:18px;padding:12px;border-radius:10px;background:#0a1322;color:#c8d7ef;font-size:14px;white-space:pre-wrap;line-height:1.5}
+.warning{font-size:13px;color:#e8c98b;border-left:3px solid #b78a3d;padding-left:12px;margin-top:18px}.foot{font-size:12px;color:#71839f;margin-top:22px}
+</style>
+</head>
+<body><main>
+<div class="mark">Casa Santini · test isolato</div><h1>Accesso con Passkey MASTER</h1>
+<p>Questa pagina verifica l'autenticazione Passkey sul database Preview. Non modifica l'accesso normale alla PWA e non comanda i dispositivi Shelly.</p>
+<button id="start" type="button">Accedi con Passkey</button>
+<div id="status" role="status" aria-live="polite">Pronto. Premi il pulsante e conferma con Windows Hello o con il dispositivo su cui hai registrato la Passkey.</div>
+<div class="warning">Test esclusivamente sul Worker e sul database Preview. Il token di sessione viene mantenuto soltanto in memoria in questa pagina e non viene mostrato.</div>
+<div class="foot">Casa Santini · autenticazione WebAuthn Preview · nessun collegamento al Worker di produzione.</div>
+</main>
+<script>
+(() => {
+"use strict";
+const API="https://bdff9d6f-casa-smart-api-webauthn-preview.brisicche78.workers.dev";
+const button=document.getElementById("start"),statusBox=document.getElementById("status");
+const status=m=>statusBox.textContent=m;
+function decodeBase64url(v){const p=v.replace(/-/g,"+").replace(/_/g,"/")+"=".repeat((4-v.length%4)%4),b=atob(p),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a.buffer}
+function encodeBase64url(buffer){const a=new Uint8Array(buffer);let b="";for(let i=0;i<a.length;i++)b+=String.fromCharCode(a[i]);return btoa(b).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"")}
+async function post(path,payload){const r=await fetch(API+path,{method:"POST",headers:payload?{"Content-Type":"application/json"}:{},body:payload?JSON.stringify(payload):undefined,cache:"no-store",credentials:"omit",referrerPolicy:"no-referrer"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||("Errore HTTP "+r.status));return d}
+async function checkSession(token){const r=await fetch(API+"/webauthn/master/session",{method:"GET",headers:{"Authorization":"Bearer "+token},cache:"no-store",credentials:"omit",referrerPolicy:"no-referrer"});const d=await r.json().catch(()=>({}));if(!r.ok||!d.authenticated)throw new Error("Sessione non valida dopo l'autenticazione.");return d}
+button.addEventListener("click",async()=>{
+if(button.disabled)return;
+if(!window.isSecureContext||!navigator.credentials||!navigator.credentials.get){status("Questo browser non supporta le Passkey in un contesto sicuro. Apri la pagina HTTPS con un browser aggiornato.");return}
+button.disabled=true;
+try{
+status("Contatto il server Preview e preparo la richiesta di autenticazione…");
+const prepared=await post("/webauthn/master/authenticate/options",null);
+if(!prepared.options||!prepared.challengeId)throw new Error("Risposta del server incompleta.");
+const publicKey=prepared.options;publicKey.challenge=decodeBase64url(publicKey.challenge);
+if(Array.isArray(publicKey.allowCredentials))publicKey.allowCredentials=publicKey.allowCredentials.map(x=>({...x,id:decodeBase64url(x.id)}));
+status("Conferma l'accesso con la Passkey (Windows Hello, impronta, volto o PIN).");
+const credential=await navigator.credentials.get({publicKey});if(!credential)throw new Error("Autenticazione annullata.");
+const a=credential.response;
+const body={challengeId:prepared.challengeId,response:{id:credential.id,rawId:encodeBase64url(credential.rawId),type:credential.type,response:{authenticatorData:encodeBase64url(a.authenticatorData),clientDataJSON:encodeBase64url(a.clientDataJSON),signature:encodeBase64url(a.signature),userHandle:a.userHandle?encodeBase64url(a.userHandle):null},clientExtensionResults:credential.getClientExtensionResults(),authenticatorAttachment:credential.authenticatorAttachment||null}};
+status("Firma ricevuta. Verifico la Passkey sul server…");
+const verified=await post("/webauthn/master/authenticate/verify",body);
+if(!verified.verified||!verified.sessionToken||verified.role!=="master")throw new Error("Il server non ha confermato l'accesso MASTER.");
+status("Verifica della firma completata. Controllo anche la sessione appena creata…");
+const session=await checkSession(verified.sessionToken);if(!session.authenticated||session.role!=="master")throw new Error("Controllo sessione non riuscito.");
+status("ACCESSO PASSKEY MASTER RIUSCITO.\nFirma verificata e sessione confermata dal Worker Preview.\nDurata sessione: 12 ore. Questa pagina non ha modificato la PWA.");
+button.textContent="Test completato";
+}catch(e){status("Test non completato: "+(e&&e.message?e.message:"errore sconosciuto")+"\n\nNon reinserire segreti: questa procedura non ne richiede.");button.disabled=false}
+});
+})();
+</script>
+</body></html>
