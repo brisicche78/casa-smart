@@ -466,7 +466,7 @@ async function verifyMasterAuthentication(request, env, origin) {
   try {
     const results = await env.DB.batch([
       env.DB.prepare(
-        "INSERT INTO webauthn_sessions (id, user_id, token_hash, challenge_id, expires_at) SELECT ?, ?, ?, ?, unixepoch() + 43200 WHERE EXISTS (SELECT 1 FROM webauthn_challenges WHERE id = ? AND user_id = ? AND challenge = ? AND purpose = 'master-authentication' AND expires_at > unixepoch())"
+        "INSERT INTO webauthn_sessions (id, user_id, token_hash, challenge_id, expires_at) SELECT ?, ?, ?, ?, unixepoch() + 2592000 WHERE EXISTS (SELECT 1 FROM webauthn_challenges WHERE id = ? AND user_id = ? AND challenge = ? AND purpose = 'master-authentication' AND expires_at > unixepoch())"
       ).bind(sessionId, MASTER_ID, tokenHash, body.challengeId, body.challengeId, MASTER_ID, challenge.challenge),
       env.DB.prepare(
         "UPDATE webauthn_credentials SET sign_count = ?, last_used_at = unixepoch() WHERE id = ? AND user_id = ? AND revoked_at IS NULL"
@@ -488,7 +488,7 @@ async function verifyMasterAuthentication(request, env, origin) {
     user: master.name,
     role: "master",
     sessionToken,
-    expiresIn: 43200
+    expiresIn: 2592000
   }, 200, origin, env.WEBAUTHN_ORIGIN);
 }
 
@@ -510,9 +510,26 @@ async function masterSessionStatus(request, env, origin) {
     return json({ authenticated: false }, 401, origin, env.WEBAUTHN_ORIGIN);
   }
   await env.DB.prepare(
-    "UPDATE webauthn_sessions SET last_used_at = unixepoch() WHERE id = ?"
+    "UPDATE webauthn_sessions SET last_used_at = unixepoch(), expires_at = unixepoch() + 2592000 WHERE id = ? AND revoked_at IS NULL"
   ).bind(session.id).run();
-  return json({ authenticated: true, user: session.name, role: session.role }, 200, origin, env.WEBAUTHN_ORIGIN);
+  return json({ authenticated: true, user: session.name, role: session.role, expiresIn: 2592000 }, 200, origin, env.WEBAUTHN_ORIGIN);
+}
+
+async function masterSessionLogout(request, env, origin) {
+  if (!allowedRequestOrigin(request, env)) {
+    return json({ error: "Origine non autorizzata" }, 403, origin, env.WEBAUTHN_ORIGIN);
+  }
+  const authorization = request.headers.get("Authorization") || "";
+  const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
+  if (!token || token.length > 256) {
+    return json({ ok: true, revoked: false }, 200, origin, env.WEBAUTHN_ORIGIN);
+  }
+  await ensureSessionTable(env);
+  const tokenHash = await sha256Hex(token);
+  const result = await env.DB.prepare(
+    "UPDATE webauthn_sessions SET revoked_at = unixepoch() WHERE token_hash = ? AND user_id = ? AND revoked_at IS NULL"
+  ).bind(tokenHash, MASTER_ID).run();
+  return json({ ok: true, revoked: Number(result?.meta?.changes || 0) === 1 }, 200, origin, env.WEBAUTHN_ORIGIN);
 }
 
 export default {
@@ -601,6 +618,14 @@ export default {
         return await masterSessionStatus(request, env, origin);
       } catch {
         return json({ error: "Errore interno durante il controllo della sessione" }, 500, origin, env.WEBAUTHN_ORIGIN);
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/webauthn/master/logout") {
+      try {
+        return await masterSessionLogout(request, env, origin);
+      } catch {
+        return json({ error: "Errore interno durante la chiusura della sessione" }, 500, origin, env.WEBAUTHN_ORIGIN);
       }
     }
 
