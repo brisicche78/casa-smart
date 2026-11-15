@@ -25,7 +25,7 @@ button{width:100%;margin-top:16px;padding:14px;border:0;border-radius:12px;backg
 <script>
 (() => {
 "use strict";
-const API="https://bdff9d6f-casa-smart-api-webauthn-preview.brisicche78.workers.dev";
+const API="https://c262b291-casa-smart-api-webauthn-preview.brisicche78.workers.dev";
 const button=document.getElementById("start"),statusBox=document.getElementById("status");
 const status=m=>statusBox.textContent=m;
 function decodeBase64url(v){const p=v.replace(/-/g,"+").replace(/_/g,"/")+"=".repeat((4-v.length%4)%4),b=atob(p),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a.buffer}
