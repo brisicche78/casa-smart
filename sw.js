@@ -19,7 +19,7 @@ self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
   // La pagina temporanea WebAuthn deve restare fuori dalla cache della PWA.
-  if (url.pathname.endsWith("/webauthn-enroll.html")) return;
+  if (url.pathname.endsWith("/webauthn-enroll.html") || url.pathname.endsWith("/webauthn-login-test.html")) return;
   event.respondWith(fetch(event.request).then(response => {
     const copy = response.clone();
     caches.open(CACHE).then(cache => cache.put(event.request, copy));
