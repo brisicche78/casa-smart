@@ -828,7 +828,7 @@ async function familyAuthenticationOptions(request, env, origin) {
   try { body=await readJson(request); } catch { return json({error:"Richiesta non valida"},400,origin,env.WEBAUTHN_ORIGIN); }
   const name=typeof body.name==="string"?body.name.trim().replace(/\s+/g," ").slice(0,50):"";
   if (!name) return json({error:"Inserisci il nome."},400,origin,env.WEBAUTHN_ORIGIN);
-  const user=await env.DB.prepare("SELECT id,name,status FROM app_users WHERE role='family' AND lower(name)=lower(?) LIMIT 1").bind(name).first();
+  const user=await env.DB.prepare("SELECT id,name,status FROM app_users WHERE role='family' AND status='active' AND lower(name)=lower(?) LIMIT 1").bind(name).first();
   if (!user || user.status!=="active") return json({error:"Accesso non ancora autorizzato. Se hai appena inviato la richiesta, attendi l'approvazione del MASTER."},403,origin,env.WEBAUTHN_ORIGIN);
   const creds=await env.DB.prepare("SELECT credential_id,transports FROM webauthn_credentials WHERE user_id=? AND revoked_at IS NULL").bind(user.id).all();
   const rows=creds.results||[];
