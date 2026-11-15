@@ -11,7 +11,7 @@
 <footer>CASA SANTINI · WEBAUTHN PREVIEW · PRODUZIONE NON COLLEGATA</footer></main>
 <script>
 (()=>{"use strict";
-const API="https://c262b291-casa-smart-api-webauthn-preview.brisicche78.workers.dev";
+const API="https://6bb5d172-casa-smart-api-webauthn-preview.brisicche78.workers.dev";
 const $=id=>document.getElementById(id);let busy=false;
 function say(t){$("status").textContent=t}
 function fromB64(v){const p=v.replace(/-/g,"+").replace(/_/g,"/")+"=".repeat((4-v.length%4)%4);const b=atob(p),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a.buffer}
