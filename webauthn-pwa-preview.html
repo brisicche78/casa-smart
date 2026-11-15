@@ -17,7 +17,7 @@ h1{font-size:21px;letter-spacing:1.5px;margin:0}.sub{font-size:10px;color:#91a5c
 .card{background:linear-gradient(145deg,#101e33f5,#091323f7);border:1px solid #203955;border-radius:21px;padding:20px;margin:13px 0;box-shadow:0 16px 42px #0005}
 h2{font-size:16px;margin:0 0 8px}.muted{font-size:12px;color:var(--muted);line-height:1.6}
 button{width:100%;padding:14px;border:0;border-radius:13px;font:inherit;font-size:12px;font-weight:800;letter-spacing:.7px;cursor:pointer;margin-top:12px;background:linear-gradient(100deg,#087cae,#426ff0);color:white}
-button.secondary{background:#14243a;border:1px solid #2b4968;color:#c8e4ff}button:disabled{opacity:.5;cursor:wait}
+button.secondary{background:#14243a;border:1px solid #2b4968;color:#c8e4ff}button:disabled{opacity:.5;cursor:wait}input{width:100%;margin:8px 0 2px;padding:14px;border:1px solid #2b4968;border-radius:12px;background:#081323;color:#eef7ff;font:inherit;font-size:13px}.family-row{padding:12px 0;border-top:1px solid var(--line)}.family-row strong{display:block;font-size:13px}.family-row small{display:block;color:var(--muted);font-size:10px;margin-top:4px}.family-actions{display:flex;gap:8px}.family-actions button{flex:1;padding:10px 6px;font-size:10px}
 #status{min-height:54px;padding:12px;border-radius:12px;background:#081323;color:#c8d7ef;font-size:12px;line-height:1.6;white-space:pre-wrap;margin-top:15px}
 .banner{border:1px solid #75603b;background:#30251655;color:#ffe0a0;padding:12px;border-radius:12px;font-size:11px;line-height:1.55;margin:14px 0}
 .pill{display:inline-block;padding:5px 9px;border-radius:20px;background:#26334a;color:#b8c9df;font-size:9px;letter-spacing:.7px;text-transform:uppercase}
@@ -34,7 +34,15 @@ button.secondary{background:#14243a;border:1px solid #2b4968;color:#c8e4ff}butto
 <p class="muted">Accedi con la Passkey MASTER registrata. Puoi usare Windows Hello, PIN, impronta o il metodo supportato dal tuo dispositivo.</p>
 <button id="loginBtn" type="button">ACCEDI CON PASSKEY</button>
 <div id="status" role="status" aria-live="polite">Controllo della sessione in corso…</div>
-</section>
+<div class="banner"><strong>ACCESSO FAMILIARE</strong><br>Ogni familiare può registrare la propria Passkey. L'accesso sarà attivato solo dopo la tua approvazione MASTER.</div>
+<div class="card" id="familyAccess">
+<h2>Familiari</h2>
+<label class="muted" for="familyName">Nome e cognome</label>
+<input id="familyName" type="text" maxlength="50" autocomplete="name" placeholder="Es. Mario Rossi">
+<button id="familyRegisterBtn" type="button">RICHIEDI ACCESSO CON PASSKEY</button>
+<button id="familyLoginBtn" class="secondary" type="button">ACCEDI COME FAMILIARE</button>
+<div id="familyStatus" class="muted" role="status" aria-live="polite" style="margin-top:12px;white-space:pre-wrap">La richiesta viene inviata al MASTER per l'approvazione.</div>
+</div></section>
 <section id="dashboard" class="hidden">
 <div class="card">
 <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><h2>Accesso MASTER attivo</h2><div class="muted" id="userInfo">Sessione verificata</div></div><span class="pill ok">Autenticato</span></div>
@@ -48,6 +56,14 @@ button.secondary{background:#14243a;border:1px solid #2b4968;color:#c8e4ff}butto
 <div class="device"><div><strong>Faretti piazzale</strong><small>Illuminazione esterna · comando disabilitato</small></div><button disabled>PREVIEW</button></div>
 <div class="device"><div><strong>Lampioncino scale</strong><small>Luce ingresso · comando disabilitato</small></div><button disabled>PREVIEW</button></div>
 </div>
+<div class="card" id="familyAdmin">
+<h2>Gestione familiari</h2><p class="muted">Approva le richieste oppure revoca un accesso già autorizzato.</p>
+<div class="device"><div><strong>Richieste in attesa</strong><small id="requestCount">—</small></div><button id="refreshFamilyBtn" type="button">AGGIORNA</button></div>
+<div id="familyRequests" class="muted">Caricamento…</div>
+<div class="device"><div><strong>Familiari autorizzati</strong><small id="userCount">—</small></div></div>
+<div id="familyUsers" class="muted">Caricamento…</div><div id="familyAdminStatus" class="muted" role="status" style="margin-top:12px;white-space:pre-wrap"></div>
+</div>
+<div class="card hidden" id="familyHome"><h2>Accesso familiare attivo</h2><p class="muted" id="familyWelcome">Sessione verificata.</p><button id="familyLogoutBtn" class="secondary" type="button">DISCONNETTI</button></div>
 </section>
 <footer>CASA SANTINI · WEBAUTHN PREVIEW · PRODUZIONE NON COLLEGATA</footer>
 </main>
@@ -112,5 +128,6 @@ catch(error){try{await clearToken()}catch{}showLogin("Sessione non valida o scad
 })();
 })();
 </script>
+<script src="./family-preview.js"></script>
 </body>
 </html>
