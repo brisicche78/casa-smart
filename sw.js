@@ -1,4 +1,4 @@
-const CACHE = "casa-santini-v5";
+const CACHE = "casa-santini-v6";
 const FILES = [
   "./",
   "./index.html",
@@ -19,7 +19,7 @@ self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
   // Le pagine temporanee WebAuthn restano fuori dalla cache della PWA.
-  if (url.pathname.endsWith("/webauthn-enroll.html") || url.pathname.endsWith("/webauthn-login-test.html") || url.pathname.endsWith("/webauthn-pwa-preview.html")) return;
+  if (url.pathname.endsWith("/webauthn-enroll.html") || url.pathname.endsWith("/webauthn-login-test.html") || url.pathname.endsWith("/webauthn-pwa-preview.html") || url.pathname.endsWith("/webauthn-add-device.html")) return;
   event.respondWith(fetch(event.request).then(response => {
     const copy = response.clone();
     caches.open(CACHE).then(cache => cache.put(event.request, copy));
