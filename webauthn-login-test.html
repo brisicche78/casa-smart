@@ -18,6 +18,7 @@ button{width:100%;margin-top:16px;padding:14px;border:0;border-radius:12px;backg
 <div class="mark">Casa Santini · test isolato</div><h1>Accesso con Passkey MASTER</h1>
 <p>Questa pagina verifica l'autenticazione Passkey sul database Preview. Non modifica l'accesso normale alla PWA e non comanda i dispositivi Shelly.</p>
 <button id="start" type="button">Accedi con Passkey</button>
+<button id="logout" type="button" hidden>Prova logout</button>
 <div id="status" role="status" aria-live="polite">Pronto. Premi il pulsante e conferma con Windows Hello o con il dispositivo su cui hai registrato la Passkey.</div>
 <div class="warning">Test esclusivamente sul Worker e sul database Preview. Il token di sessione viene mantenuto soltanto in memoria in questa pagina e non viene mostrato.</div>
 <div class="foot">Casa Santini · autenticazione WebAuthn Preview · nessun collegamento al Worker di produzione.</div>
@@ -26,7 +27,8 @@ button{width:100%;margin-top:16px;padding:14px;border:0;border-radius:12px;backg
 (() => {
 "use strict";
 const API="https://c262b291-casa-smart-api-webauthn-preview.brisicche78.workers.dev";
-const button=document.getElementById("start"),statusBox=document.getElementById("status");
+const button=document.getElementById("start"),logoutButton=document.getElementById("logout"),statusBox=document.getElementById("status");
+let sessionToken="";
 const status=m=>statusBox.textContent=m;
 function decodeBase64url(v){const p=v.replace(/-/g,"+").replace(/_/g,"/")+"=".repeat((4-v.length%4)%4),b=atob(p),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a.buffer}
 function encodeBase64url(buffer){const a=new Uint8Array(buffer);let b="";for(let i=0;i<a.length;i++)b+=String.fromCharCode(a[i]);return btoa(b).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"")}
@@ -51,9 +53,27 @@ const verified=await post("/webauthn/master/authenticate/verify",body);
 if(!verified.verified||!verified.sessionToken||verified.role!=="master")throw new Error("Il server non ha confermato l'accesso MASTER.");
 status("Verifica della firma completata. Controllo anche la sessione appena creata…");
 const session=await checkSession(verified.sessionToken);if(!session.authenticated||session.role!=="master")throw new Error("Controllo sessione non riuscito.");
-status("ACCESSO PASSKEY MASTER RIUSCITO.\nFirma verificata e sessione confermata dal Worker Preview.\nDurata sessione: 12 ore. Questa pagina non ha modificato la PWA.");
-button.textContent="Test completato";
+if(Number(verified.expiresIn)!==2592000||Number(session.expiresIn)!==2592000)throw new Error("Durata sessione diversa dai 30 giorni attesi.");
+sessionToken=verified.sessionToken;
+status("ACCESSO PASSKEY MASTER RIUSCITO.\nFirma verificata e sessione confermata.\nScadenza mobile: 30 giorni dall’ultima verifica valida.\nOra puoi provare il logout.");
+button.textContent="Accesso verificato";
+button.disabled=true;
+logoutButton.hidden=false;
 }catch(e){status("Test non completato: "+(e&&e.message?e.message:"errore sconosciuto")+"\n\nNon reinserire segreti: questa procedura non ne richiede.");button.disabled=false}
+});
+logoutButton.addEventListener("click",async()=>{
+if(!sessionToken)return;
+logoutButton.disabled=true;
+try{
+const result=await post("/webauthn/master/logout",null,sessionToken);
+if(!result.ok||!result.revoked)throw new Error("Il server non ha confermato la revoca.");
+let rejected=false;
+try{await checkSession(sessionToken)}catch{rejected=true}
+if(!rejected)throw new Error("La sessione risulta ancora valida dopo il logout.");
+sessionToken="";
+status("LOGOUT RIUSCITO.\\nSessione revocata dal server Preview.\\nIl token non è più valido.");
+logoutButton.textContent="Logout verificato";
+}catch(e){status("Logout non verificato: "+(e&&e.message?e.message:"errore sconosciuto"));logoutButton.disabled=false}
 });
 })();
 </script>
