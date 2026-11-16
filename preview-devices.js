@@ -49,6 +49,7 @@ async function apiRead(token) {
   return { response, data };
 }
 function addReadOnlyUi(card) {
+  if (!card.querySelector(".device[data-device]")) return;
   if (card.dataset.readOnlyReady === "1") return;
   card.dataset.readOnlyReady = "1";
   const heading = card.querySelector("h2");
@@ -164,6 +165,9 @@ async function refreshAll(manual = false) {
   } finally { busy = false; }
 }
 function init() {
+  document.querySelectorAll("#dashboard .banner, #familyHome .banner").forEach(banner => {
+    banner.innerHTML = "<strong>PREVIEW · SOLA LETTURA</strong><br>Visualizzazione dello stato dei dispositivi. Tutti i comandi sono disattivati: nessuna accensione o apertura può essere inviata.";
+  });
   document.querySelectorAll(".card").forEach(addReadOnlyUi);
   refreshAll();
   // Controlla prima la presenza della sessione, poi aggiorna lo stato ogni 60 secondi.
