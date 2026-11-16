@@ -49,7 +49,7 @@ button.secondary{background:#14243a;border:1px solid #2b4968;color:#c8e4ff}butto
 <p class="muted" id="expiryInfo">Sessione rinnovata durante l'utilizzo.</p>
 <button id="logoutBtn" class="secondary" type="button">DISCONNETTI · REVOCA SESSIONE</button>
 </div>
-<div class="banner"><strong>AMBIENTE DI PROVA</strong><br>La verifica Passkey e la sessione sono collegate al Worker e al database Preview. I comandi qui sotto sono simulati soltanto nel browser: nessuna richiesta viene inviata agli Shelly o alla produzione.</div>
+<div class="banner"><strong>AMBIENTE DI PROVA</strong><br>La verifica Passkey e la sessione sono collegate al Worker e al database Preview. Lo stato dei dispositivi è letto dagli Shelly reali; i comandi restano disattivati.</div>
 <div class="card">
 <h2>Dispositivi Casa Santini</h2>
 <div class="device" data-device="gate"><div><strong>Cancello</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Pronto</small></div><button type="button" data-action="pulse">SIMULA APERTURA</button></div>
@@ -70,7 +70,7 @@ button.secondary{background:#14243a;border:1px solid #2b4968;color:#c8e4ff}butto
 <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><h2>Casa Santini</h2><div class="muted" id="familyWelcome">Sessione verificata.</div></div><span class="pill ok">Familiare</span></div>
 <button id="familyLogoutBtn" class="secondary" type="button">DISCONNETTI</button>
 </div>
-<div class="banner"><strong>AMBIENTE DI PROVA</strong><br>Puoi visualizzare i dispositivi. I comandi sono simulati soltanto nel browser e non comunicano con gli Shelly reali.</div>
+<div class="banner"><strong>AMBIENTE DI PROVA</strong><br>Puoi visualizzare lo stato reale dei dispositivi. I comandi restano disattivati nella Preview.</div>
 <div class="card">
 <h2>Dispositivi Casa Santini</h2>
 <div class="device" data-device="gate"><div><strong>Cancello</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Pronto</small></div><button type="button" data-action="pulse">SIMULA APERTURA</button></div>
