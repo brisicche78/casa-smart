@@ -82,6 +82,21 @@ function addReadOnlyUi(card) {
   card.querySelectorAll(".device[data-device]").forEach(device => {
     const button = device.querySelector("button[data-action]");
     const state = device.querySelector(".device-state");
+    const copy = device.querySelector(":scope > div");
+    if (copy && !copy.classList.contains("device-copy")) copy.classList.add("device-copy");
+    if (!device.querySelector(".device-icon")) {
+      const icon = document.createElement("span");
+      icon.className = "device-icon";
+      icon.setAttribute("aria-hidden", "true");
+      icon.textContent = device.dataset.device === "gate" ? "▥" : device.dataset.device === "yard" ? "✦" : "◉";
+      device.insertBefore(icon, device.firstChild);
+    }
+    if (state && !state.querySelector(".device-led")) {
+      const led = document.createElement("span");
+      led.className = "device-led";
+      led.setAttribute("aria-hidden", "true");
+      state.prepend(led);
+    }
     if (button) {
       button.disabled = !CONTROL_ENABLED_IN_PREVIEW || device.dataset.device !== "gate";
       button.textContent = CONTROL_ENABLED_IN_PREVIEW ? (device.dataset.device === "gate" ? "INVIA IMPULSO" : "AGGIORNA STATO") : "COMANDI DISATTIVATI";
@@ -130,12 +145,14 @@ function renderDevices(devices) {
       return;
     }
     if (item.kind === "gate") {
-      state.textContent = "Online · solo impulso · non rileva aperto/chiuso";
+      state.textContent = "Online · impulso disponibile · posizione non rilevata";
+      card.dataset.state = "online";
       return;
     }
     const output = extractOutput(item.status);
     state.textContent = output === null ? "Online · stato luce non disponibile" :
       "Online · " + (output ? "Accesa" : "Spenta");
+    card.dataset.state = output === null ? "online" : (output ? "on" : "off");
     const button = card.querySelector("button[data-action]");
     if (button && CONTROL_ENABLED_IN_PREVIEW) {
       button.textContent = output === null ? "STATO NON DISPONIBILE" : (output ? "SPEGNI" : "ACCENDI");
@@ -234,9 +251,6 @@ async function sendDeviceCommand(device) {
 }
 
 function init() {
-  document.querySelectorAll("#dashboard .banner, #familyHome .banner").forEach(banner => {
-    banner.innerHTML = "<strong>PREVIEW · SOLA LETTURA</strong><br>Visualizzazione dello stato dei dispositivi. Tutti i comandi sono disattivati: nessuna accensione o apertura può essere inviata.";
-  });
   document.querySelectorAll(".card").forEach(addReadOnlyUi);
   refreshAll();
   // Controlla prima la presenza della sessione, poi aggiorna lo stato ogni 60 secondi.
