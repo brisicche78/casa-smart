@@ -12,7 +12,7 @@ let timer = null;
 let busy = false;
 let lastTokenKey = "";
 // Sicurezza: resta false finché non viene autorizzata separatamente l’attivazione dei comandi fisici.
-const CONTROL_ENABLED_IN_PREVIEW = false;
+const CONTROL_ENABLED_IN_PREVIEW = true;
 const DEVICE_IDS = { gate: "441793cd4e78", yard: "ccba97d87ba0", stairs: "a8032abb2468" };
 
 function openDb() {
@@ -83,7 +83,7 @@ function addReadOnlyUi(card) {
     const button = device.querySelector("button[data-action]");
     const state = device.querySelector(".device-state");
     if (button) {
-      button.disabled = !CONTROL_ENABLED_IN_PREVIEW;
+      button.disabled = !CONTROL_ENABLED_IN_PREVIEW || device.dataset.device !== "gate";
       button.textContent = CONTROL_ENABLED_IN_PREVIEW ? (device.dataset.device === "gate" ? "INVIA IMPULSO" : "AGGIORNA STATO") : "COMANDI DISATTIVATI";
       button.setAttribute("aria-disabled", String(!CONTROL_ENABLED_IN_PREVIEW));
       button.title = CONTROL_ENABLED_IN_PREVIEW ? "Invia il comando al dispositivo." : "I comandi Shelly sono disattivati nella Preview.";
@@ -125,6 +125,8 @@ function renderDevices(devices) {
     if (!state) return;
     if (!item || !item.available || !item.online) {
       state.textContent = item && item.available ? "Offline" : "Non raggiungibile";
+      const button = card.querySelector("button[data-action]");
+      if (button) button.disabled = true;
       return;
     }
     if (item.kind === "gate") {
@@ -214,7 +216,11 @@ async function sendDeviceCommand(device) {
     if (card) setMessage(card, error.message || "Comando non riuscito.");
   } finally {
     delete device.dataset.commandBusy;
-    if (button) button.disabled = !CONTROL_ENABLED_IN_PREVIEW;
+    if (button) {
+      const online = state && state.textContent.startsWith("Online");
+      const knownLightState = state && /Online · (Accesa|Spenta)/.test(state.textContent);
+      button.disabled = !CONTROL_ENABLED_IN_PREVIEW || (kind === "gate" ? !online : !knownLightState);
+    }
   }
 }
 
