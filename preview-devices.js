@@ -1,7 +1,7 @@
 (() => {
 "use strict";
 
-// Preview: sola lettura. Nessun comando viene inviato agli Shelly.
+// Preview: comandi predisposti ma disattivati finché il controllo fisico non viene autorizzato.
 const API = "https://casa-smart-api-webauthn-preview.brisicche78.workers.dev";
 const DEVICE_LABELS = {
   "441793cd4e78": "Cancello",
@@ -11,6 +11,9 @@ const DEVICE_LABELS = {
 let timer = null;
 let busy = false;
 let lastTokenKey = "";
+// Sicurezza: resta false finché non viene autorizzata separatamente l’attivazione dei comandi fisici.
+const CONTROL_ENABLED_IN_PREVIEW = false;
+const DEVICE_IDS = { gate: "441793cd4e78", yard: "ccba97d87ba0", stairs: "a8032abb2468" };
 
 function openDb() {
   return new Promise((resolve, reject) => {
@@ -80,10 +83,14 @@ function addReadOnlyUi(card) {
     const button = device.querySelector("button[data-action]");
     const state = device.querySelector(".device-state");
     if (button) {
-      button.disabled = true;
-      button.textContent = "COMANDI DISATTIVATI";
-      button.setAttribute("aria-disabled", "true");
-      button.title = "I comandi Shelly sono disattivati nella Preview.";
+      button.disabled = !CONTROL_ENABLED_IN_PREVIEW;
+      button.textContent = CONTROL_ENABLED_IN_PREVIEW ? (device.dataset.device === "gate" ? "INVIA IMPULSO" : "AGGIORNA STATO") : "COMANDI DISATTIVATI";
+      button.setAttribute("aria-disabled", String(!CONTROL_ENABLED_IN_PREVIEW));
+      button.title = CONTROL_ENABLED_IN_PREVIEW ? "Invia il comando al dispositivo." : "I comandi Shelly sono disattivati nella Preview.";
+      if (!button.dataset.commandBound) {
+        button.dataset.commandBound = "1";
+        button.addEventListener("click", () => sendDeviceCommand(device));
+      }
     }
     if (state) state.textContent = "In attesa della lettura";
   });
@@ -127,6 +134,11 @@ function renderDevices(devices) {
     const output = extractOutput(item.status);
     state.textContent = output === null ? "Online · stato luce non disponibile" :
       "Online · " + (output ? "Accesa" : "Spenta");
+    const button = card.querySelector("button[data-action]");
+    if (button && CONTROL_ENABLED_IN_PREVIEW) {
+      button.textContent = output === null ? "STATO NON DISPONIBILE" : (output ? "SPEGNI" : "ACCENDI");
+      button.disabled = output === null;
+    }
   });
 }
 async function refreshAll(manual = false) {
@@ -164,6 +176,48 @@ async function refreshAll(manual = false) {
     cards.forEach(card => setMessage(card, "Lettura non riuscita. Verifica la connessione."));
   } finally { busy = false; }
 }
+
+async function sendDeviceCommand(device) {
+  if (!CONTROL_ENABLED_IN_PREVIEW || device.dataset.commandBusy === "1") return;
+  const kind = device.dataset.device;
+  const id = DEVICE_IDS[kind];
+  const button = device.querySelector("button[data-action]");
+  if (!id || !button) return;
+  const state = device.querySelector(".device-state");
+  const card = device.closest(".card");
+  try {
+    device.dataset.commandBusy = "1";
+    button.disabled = true;
+    button.textContent = "INVIO…";
+    const session = await getSessionToken();
+    if (!session) throw new Error("Sessione assente. Accedi nuovamente.");
+    const payload = kind === "gate" ? { id, pulse: true } : {
+      id,
+      on: !(state && /Online · Accesa/.test(state.textContent))
+    };
+    const response = await fetch(API + "/devices/switch", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + session.token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+      credentials: "omit",
+      referrerPolicy: "no-referrer"
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.ok !== true) throw new Error(data.error || ("Comando rifiutato (HTTP " + response.status + ")"));
+    if (card) setMessage(card, kind === "gate" ? "Impulso inviato. La posizione del cancello non è rilevabile." : "Comando inviato. Aggiornamento dello stato…");
+    await refreshAll(true);
+  } catch (error) {
+    if (card) setMessage(card, error.message || "Comando non riuscito.");
+  } finally {
+    delete device.dataset.commandBusy;
+    if (button) button.disabled = !CONTROL_ENABLED_IN_PREVIEW;
+  }
+}
+
 function init() {
   document.querySelectorAll("#dashboard .banner, #familyHome .banner").forEach(banner => {
     banner.innerHTML = "<strong>PREVIEW · SOLA LETTURA</strong><br>Visualizzazione dello stato dei dispositivi. Tutti i comandi sono disattivati: nessuna accensione o apertura può essere inviata.";
