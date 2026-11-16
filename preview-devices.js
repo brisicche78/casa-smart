@@ -121,7 +121,7 @@ function renderDevices(devices) {
       return;
     }
     if (item.kind === "gate") {
-      state.textContent = "Online · stato apertura non disponibile";
+      state.textContent = "Online · solo impulso · non rileva aperto/chiuso";
       return;
     }
     const output = extractOutput(item.status);
