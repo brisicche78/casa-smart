@@ -91,12 +91,6 @@ function addReadOnlyUi(card) {
       icon.textContent = device.dataset.device === "gate" ? "▥" : device.dataset.device === "yard" ? "✦" : "◉";
       device.insertBefore(icon, device.firstChild);
     }
-    if (state && !state.querySelector(".device-led")) {
-      const led = document.createElement("span");
-      led.className = "device-led";
-      led.setAttribute("aria-hidden", "true");
-      state.prepend(led);
-    }
     if (button) {
       button.disabled = !CONTROL_ENABLED_IN_PREVIEW || device.dataset.device !== "gate";
       button.textContent = CONTROL_ENABLED_IN_PREVIEW ? (device.dataset.device === "gate" ? "INVIA IMPULSO" : "AGGIORNA STATO") : "COMANDI DISATTIVATI";
@@ -140,6 +134,7 @@ function renderDevices(devices) {
     if (!state) return;
     if (!item || !item.available || !item.online) {
       state.textContent = item && item.available ? "Offline" : "Non raggiungibile";
+      card.dataset.state = "offline";
       const button = card.querySelector("button[data-action]");
       if (button) button.disabled = true;
       return;
@@ -190,7 +185,7 @@ async function refreshAll(manual = false) {
     }
     renderDevices(result.data.devices);
     const now = new Date().toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
-    cards.forEach(card => setMessage(card, "Stato aggiornato alle " + now + ". Sola lettura · comandi disattivati."));
+    cards.forEach(card => setMessage(card, "Ultimo aggiornamento · " + now));
   } catch (error) {
     cards.forEach(card => setMessage(card, "Lettura non riuscita. Verifica la connessione."));
   } finally { busy = false; }
