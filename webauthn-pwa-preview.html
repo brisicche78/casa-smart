@@ -37,6 +37,10 @@ header{margin-bottom:20px}
 #dashboard>.card:has(.device[data-device]) h2,#familyHome>.card:has(.device[data-device]) h2{font-size:17px;letter-spacing:.07em;text-transform:uppercase}
 .device[data-device]{position:relative;display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:14px;padding:17px 0;border-top:1px solid var(--line);min-height:94px;transition:background .2s,border-color .2s}
 .device[data-device] .device-copy{min-width:0}
+.device[data-device] .device-state::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;background:#64748b;vertical-align:middle}
+.device[data-state="online"] .device-state::before{background:#34d399;box-shadow:0 0 8px rgba(52,211,153,.65)}
+.device[data-state="on"] .device-state::before{background:#f59e0b;box-shadow:0 0 8px rgba(245,158,11,.65)}
+.device[data-state="offline"] .device-state::before{background:#fb7185;box-shadow:0 0 8px rgba(251,113,133,.55)}
 .device[data-device] strong{font-size:14px;font-weight:650;letter-spacing:.01em}
 .device[data-device] small{font-size:11px;line-height:1.5;margin-top:6px}
 .device-icon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:rgba(56,189,248,.09);border:1px solid rgba(56,189,248,.2);color:#7dd3fc;font-size:23px;flex-shrink:0}
