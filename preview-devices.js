@@ -2,7 +2,7 @@
 "use strict";
 
 // Preview: sola lettura. Nessun comando viene inviato agli Shelly.
-const API = "https://b1ecd5c6-casa-smart-api-webauthn-preview.brisicche78.workers.dev";
+const API = "https://casa-smart-api-webauthn-preview.brisicche78.workers.dev";
 const DEVICE_LABELS = {
   "441793cd4e78": "Cancello",
   "ccba97d87ba0": "Faretti piazzale",
