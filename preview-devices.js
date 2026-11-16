@@ -187,16 +187,15 @@ async function sendDeviceCommand(device) {
   if (!id || !button) return;
   const state = device.querySelector(".device-state");
   const card = device.closest(".card");
+  let desiredOn = null;
   try {
     device.dataset.commandBusy = "1";
     button.disabled = true;
     button.textContent = "INVIO…";
     const session = await getSessionToken();
     if (!session) throw new Error("Sessione assente. Accedi nuovamente.");
-    const payload = kind === "gate" ? { id, pulse: true } : {
-      id,
-      on: !(state && /Online · Accesa/.test(state.textContent))
-    };
+    if (kind !== "gate") desiredOn = !(state && /Online · Accesa/.test(state.textContent));
+    const payload = kind === "gate" ? { id, pulse: true } : { id, on: desiredOn };
     const response = await fetch(API + "/devices/switch", {
       method: "POST",
       headers: {
@@ -210,8 +209,16 @@ async function sendDeviceCommand(device) {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || data.ok !== true) throw new Error(data.error || ("Comando rifiutato (HTTP " + response.status + ")"));
-    if (card) setMessage(card, kind === "gate" ? "Impulso inviato. La posizione del cancello non è rilevabile." : "Comando inviato. Aggiornamento dello stato…");
-    await refreshAll(true);
+    if (kind === "gate") {
+      if (button) button.textContent = "INVIA IMPULSO";
+      if (card) setMessage(card, "Impulso inviato. La posizione del cancello non è rilevabile.");
+    } else {
+      if (state) state.textContent = "Online · " + (desiredOn ? "Accesa" : "Spenta");
+      if (button) button.textContent = desiredOn ? "SPEGNI" : "ACCENDI";
+      if (card) setMessage(card, "Comando inviato. Stato aggiornato.");
+    }
+    // La lettura di conferma parte in sottofondo: non blocca il pulsante.
+    void refreshAll();
   } catch (error) {
     if (card) setMessage(card, error.message || "Comando non riuscito.");
   } finally {
@@ -220,6 +227,8 @@ async function sendDeviceCommand(device) {
       const online = state && state.textContent.startsWith("Online");
       const knownLightState = state && /Online · (Accesa|Spenta)/.test(state.textContent);
       button.disabled = !CONTROL_ENABLED_IN_PREVIEW || (kind === "gate" ? !online : !knownLightState);
+      if (kind === "gate") button.textContent = "INVIA IMPULSO";
+      else if (knownLightState) button.textContent = /Online · Accesa/.test(state.textContent) ? "SPEGNI" : "ACCENDI";
     }
   }
 }
