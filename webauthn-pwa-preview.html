@@ -24,11 +24,65 @@ button.secondary{background:#14243a;border:1px solid #2b4968;color:#c8e4ff}butto
 .pill.ok{background:#123d36;color:#8fffd7}.device{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px solid var(--line)}.device:first-of-type{border-top:0}.device strong{font-size:13px}.device small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
 .device button{width:auto;min-width:112px;margin:0;padding:9px 12px;background:#14243a;border:1px solid #2b4563;color:#c8e4ff}.device button:disabled{opacity:.6}.device-state{display:block}
 .hidden{display:none!important}footer{text-align:center;color:#637995;font-size:9px;letter-spacing:1.5px;margin-top:24px}
+
+/* Casa Santini · nuova interfaccia Preview */
+:root{--bg:#07111e;--panel:#0d1b2a;--accent:#38bdf8;--line:rgba(125,170,210,.16)}
+body{background-color:#07111e;background-image:radial-gradient(circle at 18% 12%,rgba(56,189,248,.09),transparent 42%),radial-gradient(circle at 82% 85%,rgba(16,185,129,.05),transparent 42%),linear-gradient(180deg,#07111e 0%,#050c16 100%)}
+main{width:min(100% - 32px,920px);padding-top:24px}
+header{margin-bottom:20px}
+.card{background:rgba(13,27,42,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(56,189,248,.14);border-top-color:rgba(255,255,255,.12);border-radius:22px;box-shadow:0 12px 32px -10px rgba(0,0,0,.58);padding:20px}
+#dashboard,#familyHome{display:grid;grid-template-columns:1fr;gap:16px}
+#dashboard>.card:first-child,#familyHome>.card:first-child{padding:16px 20px}
+#dashboard>.card:has(.device[data-device]),#familyHome>.card:has(.device[data-device]){padding:22px}
+#dashboard>.card:has(.device[data-device]) h2,#familyHome>.card:has(.device[data-device]) h2{font-size:17px;letter-spacing:.07em;text-transform:uppercase}
+.device[data-device]{position:relative;display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:14px;padding:17px 0;border-top:1px solid var(--line);min-height:94px;transition:background .2s,border-color .2s}
+.device[data-device] .device-copy{min-width:0}
+.device[data-device] strong{font-size:14px;font-weight:650;letter-spacing:.01em}
+.device[data-device] small{font-size:11px;line-height:1.5;margin-top:6px}
+.device-icon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:rgba(56,189,248,.09);border:1px solid rgba(56,189,248,.2);color:#7dd3fc;font-size:23px;flex-shrink:0}
+.device[data-state="on"] .device-icon{background:rgba(245,158,11,.16);border-color:rgba(245,158,11,.4);color:#fbbf24;box-shadow:0 5px 22px rgba(245,158,11,.08)}
+.device[data-state="offline"] .device-icon{background:rgba(244,63,94,.08);border-color:rgba(244,63,94,.22);color:#fb7185}
+.device[data-state="on"]{background:linear-gradient(90deg,rgba(245,158,11,.045),transparent 75%)}
+.device[data-state="offline"]{opacity:.72}
+.device[data-device] button{min-width:118px;min-height:44px;padding:10px 15px;border-radius:12px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.28);color:#bae6fd;font-size:11px;font-weight:800;letter-spacing:.055em;transition:background .18s,transform .18s}
+.device[data-device] button:hover:not(:disabled){background:rgba(56,189,248,.22);transform:translateY(-1px)}
+.device[data-state="on"] button{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.35);color:#fde68a}
+.device[data-device] button:disabled{opacity:.38;cursor:not-allowed;transform:none}
+.device-led{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:7px;background:#64748b;vertical-align:middle}
+.device[data-state="online"] .device-led{background:#34d399;box-shadow:0 0 8px rgba(52,211,153,.65)}
+.device[data-state="on"] .device-led{background:#f59e0b;box-shadow:0 0 8px rgba(245,158,11,.65)}
+.device[data-state="offline"] .device-led{background:#fb7185;box-shadow:0 0 8px rgba(251,113,133,.55)}
+#dashboard .banner,#familyHome .banner{display:none}
+#dashboard>.card:has(#familyAdmin){padding:18px 20px}
+#familyAdmin .device{min-height:60px}
+#familyAdmin .family-row{padding:14px 0;border-top:1px solid var(--line)}
+#familyAdmin .family-row strong{font-size:13px}
+#familyAdmin .family-actions button{min-height:38px;margin-top:8px}
+#status{background:rgba(4,12,23,.7);border:1px solid var(--line)}
+button{min-height:44px}
+button:focus-visible,input:focus-visible{outline:2px solid #38bdf8;outline-offset:3px}
+footer{font-size:9px;color:#60758e;letter-spacing:1.4px;margin-top:18px}
+@media(min-width:760px){
+ #dashboard{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}
+ #dashboard>.card:first-child{grid-column:1/-1}
+ #dashboard>.card:has(.device[data-device]){grid-column:1/-1}
+ #dashboard>.card:has(#familyAdmin){grid-column:1/-1}
+ #familyHome{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+ main{width:min(100% - 24px,920px);padding-top:16px}
+ .card{padding:16px;border-radius:19px}
+ .device[data-device]{grid-template-columns:44px minmax(0,1fr);gap:11px;padding:15px 0}
+ .device-icon{width:42px;height:42px;border-radius:13px;font-size:20px}
+ .device[data-device] button{grid-column:2;justify-self:stretch;width:100%;margin-top:1px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
 </style>
 </head>
 <body>
 <main>
-<header><div class="mark">⌂</div><div><h1>CASA SANTINI</h1><div class="sub">Preview · Accesso MASTER</div></div></header>
+<header><div class="mark">⌂</div><div><h1>CASA SANTINI</h1><div class="sub">Gestione domotica · Preview</div></div></header>
 <section id="login" class="card">
 <h2>Accesso con Passkey</h2>
 <p class="muted">Accedi con la Passkey MASTER registrata. Puoi usare Windows Hello, PIN, impronta o il metodo supportato dal tuo dispositivo.</p>
@@ -49,7 +103,7 @@ button.secondary{background:#14243a;border:1px solid #2b4968;color:#c8e4ff}butto
 <p class="muted" id="expiryInfo">Sessione rinnovata durante l'utilizzo.</p>
 <button id="logoutBtn" class="secondary" type="button">DISCONNETTI · REVOCA SESSIONE</button>
 </div>
-<div class="banner"><strong>AMBIENTE DI PROVA</strong><br>La verifica Passkey e la sessione sono collegate al Worker e al database Preview. Lo stato dei dispositivi è letto dagli Shelly reali; i comandi restano disattivati.</div>
+
 <div class="card">
 <h2>Dispositivi Casa Santini</h2>
 <div class="device" data-device="gate"><div><strong>Cancello</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Pronto</small></div><button type="button" data-action="pulse">SIMULA APERTURA</button></div>
@@ -70,7 +124,7 @@ button.secondary{background:#14243a;border:1px solid #2b4968;color:#c8e4ff}butto
 <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><h2>Casa Santini</h2><div class="muted" id="familyWelcome">Sessione verificata.</div></div><span class="pill ok">Familiare</span></div>
 <button id="familyLogoutBtn" class="secondary" type="button">DISCONNETTI</button>
 </div>
-<div class="banner"><strong>AMBIENTE DI PROVA</strong><br>Puoi visualizzare lo stato reale dei dispositivi. I comandi restano disattivati nella Preview.</div>
+
 <div class="card">
 <h2>Dispositivi Casa Santini</h2>
 <div class="device" data-device="gate"><div><strong>Cancello</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Pronto</small></div><button type="button" data-action="pulse">SIMULA APERTURA</button></div>
@@ -78,7 +132,7 @@ button.secondary{background:#14243a;border:1px solid #2b4968;color:#c8e4ff}butto
 <div class="device" data-device="stairs"><div><strong>Lampioncino scale</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Spento</small></div><button type="button" data-action="toggle">ACCENDI</button></div>
 </div>
 </section>
-<footer>CASA SANTINI · WEBAUTHN PREVIEW · PRODUZIONE NON COLLEGATA</footer>
+<footer>CASA SANTINI · AMBIENTE PREVIEW</footer>
 </main>
 <script>
 (() => {
