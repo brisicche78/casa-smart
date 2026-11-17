@@ -84,11 +84,20 @@ function addReadOnlyUi(card) {
     const state = device.querySelector(".device-state");
     const copy = device.querySelector(":scope > div");
     if (copy && !copy.classList.contains("device-copy")) copy.classList.add("device-copy");
+    const kind = device.dataset.device;
+    const panel = device.closest(".card");
+    if (panel) panel.classList.add("devices-panel");
+    device.classList.add(kind === "gate" ? "gate-device" : "light-device");
     if (!device.querySelector(".device-icon")) {
       const icon = document.createElement("span");
       icon.className = "device-icon";
       icon.setAttribute("aria-hidden", "true");
-      icon.textContent = device.dataset.device === "gate" ? "▥" : device.dataset.device === "yard" ? "✦" : "◉";
+      const drawings = {
+        gate: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 40V12h34v28M7 18h34M12 18v22m8-22v22m8-22v22m8-22v22M4 40h40"/><path d="M24 7v5"/></svg>',
+        yard: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 29c-2.5-2-4-5-4-8a11 11 0 1 1 22 0c0 3-1.5 6-4 8-1.5 1.2-2 2.5-2 4H19c0-1.5-.5-2.8-2-4Z"/><path d="M19 37h10m-8 4h6M24 2v4M5 21h4m30 0h4M9 7l3 3m24-3-3 3"/></svg>',
+        stairs: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 5a8 8 0 0 0-5 14c1.5 1.2 2 2.8 2 4h6c0-1.2.5-2.8 2-4a8 8 0 0 0-5-14Z"/><path d="M20 27h8m-7 4h6m-5 4h4M6 41h12v-6h8v-6h8v-6h8"/></svg>'
+      };
+      icon.innerHTML = drawings[kind] || "";
       device.insertBefore(icon, device.firstChild);
     }
     if (button) {
