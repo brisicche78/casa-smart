@@ -93,7 +93,7 @@ function addReadOnlyUi(card) {
     }
     if (button) {
       button.disabled = !CONTROL_ENABLED_IN_PREVIEW || device.dataset.device !== "gate";
-      button.textContent = CONTROL_ENABLED_IN_PREVIEW ? (device.dataset.device === "gate" ? "INVIA IMPULSO" : "AGGIORNA STATO") : "COMANDI DISATTIVATI";
+      button.textContent = CONTROL_ENABLED_IN_PREVIEW ? (device.dataset.device === "gate" ? "AZIONA CANCELLO" : "AGGIORNA STATO") : "COMANDI DISATTIVATI";
       button.setAttribute("aria-disabled", String(!CONTROL_ENABLED_IN_PREVIEW));
       button.title = CONTROL_ENABLED_IN_PREVIEW ? "Invia il comando al dispositivo." : "I comandi Shelly sono disattivati nella Preview.";
       if (!button.dataset.commandBound) {
@@ -140,7 +140,7 @@ function renderDevices(devices) {
       return;
     }
     if (item.kind === "gate") {
-      state.textContent = "Online · impulso disponibile · posizione non rilevata";
+      state.textContent = "Online";
       card.dataset.state = "online";
       return;
     }
@@ -222,7 +222,7 @@ async function sendDeviceCommand(device) {
     const data = await response.json().catch(() => ({}));
     if (!response.ok || data.ok !== true) throw new Error(data.error || ("Comando rifiutato (HTTP " + response.status + ")"));
     if (kind === "gate") {
-      if (button) button.textContent = "INVIA IMPULSO";
+      if (button) button.textContent = "AZIONA CANCELLO";
       if (card) setMessage(card, "Impulso inviato. La posizione del cancello non è rilevabile.");
     } else {
       if (state) state.textContent = "Online · " + (desiredOn ? "Accesa" : "Spenta");
@@ -239,7 +239,7 @@ async function sendDeviceCommand(device) {
       const online = state && state.textContent.startsWith("Online");
       const knownLightState = state && /Online · (Accesa|Spenta)/.test(state.textContent);
       button.disabled = !CONTROL_ENABLED_IN_PREVIEW || (kind === "gate" ? !online : !knownLightState);
-      if (kind === "gate") button.textContent = "INVIA IMPULSO";
+      if (kind === "gate") button.textContent = "AZIONA CANCELLO";
       else if (knownLightState) button.textContent = /Online · Accesa/.test(state.textContent) ? "SPEGNI" : "ACCENDI";
     }
   }
