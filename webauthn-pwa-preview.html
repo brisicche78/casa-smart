@@ -82,6 +82,19 @@ footer{font-size:9px;color:#60758e;letter-spacing:1.4px;margin-top:18px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
+
+/* Account/logout in fondo alla schermata */
+#dashboard,#familyHome{display:flex;flex-direction:column;gap:16px}
+#dashboard>.account-card,#familyHome>.account-card{order:99;padding:17px 20px;margin-top:2px;background:rgba(9,20,33,.72);border-color:rgba(125,170,210,.13);box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.account-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.account-heading h2{margin:0;font-size:14px;letter-spacing:.02em;text-transform:none}
+.account-heading .muted{margin:4px 0 0;font-size:11px}
+.account-logout{width:auto;min-width:190px;margin-top:14px;padding:11px 18px}
+@media(max-width:480px){
+ #dashboard>.account-card,#familyHome>.account-card{padding:15px}
+ .account-logout{width:100%;min-width:0}
+}
+
 </style>
 </head>
 <body>
@@ -105,7 +118,6 @@ footer{font-size:9px;color:#60758e;letter-spacing:1.4px;margin-top:18px}
 <div class="card">
 <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><h2>Accesso MASTER attivo</h2><div class="muted" id="userInfo">Sessione verificata</div></div><span class="pill ok">Autenticato</span></div>
 <p class="muted" id="expiryInfo">Sessione rinnovata durante l'utilizzo.</p>
-<button id="logoutBtn" class="secondary" type="button">DISCONNETTI · REVOCA SESSIONE</button>
 </div>
 
 <div class="card">
@@ -121,12 +133,15 @@ footer{font-size:9px;color:#60758e;letter-spacing:1.4px;margin-top:18px}
 <div class="device"><div><strong>Familiari autorizzati</strong><small id="userCount">—</small></div></div>
 <div id="familyUsers" class="muted">Caricamento…</div><div id="familyAdminStatus" class="muted" role="status" style="margin-top:12px;white-space:pre-wrap"></div>
 </div>
+<div class="card account-card">
+<div class="account-heading"><div><h2>Il mio account</h2><p class="muted">Sessione MASTER attiva</p></div><span class="pill ok">MASTER</span></div>
+<button id="logoutBtn" class="secondary account-logout" type="button">DISCONNETTI · REVOCA SESSIONE</button>
+</div>
 
 </section>
 <section class="hidden" id="familyHome">
 <div class="card">
 <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><h2>Casa Santini</h2><div class="muted" id="familyWelcome">Sessione verificata.</div></div><span class="pill ok">Familiare</span></div>
-<button id="familyLogoutBtn" class="secondary" type="button">DISCONNETTI</button>
 </div>
 
 <div class="card">
@@ -134,6 +149,10 @@ footer{font-size:9px;color:#60758e;letter-spacing:1.4px;margin-top:18px}
 <div class="device" data-device="gate"><div><strong>Cancello</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Pronto</small></div><button type="button" data-action="pulse">SIMULA APERTURA</button></div>
 <div class="device" data-device="yard"><div><strong>Faretti piazzale</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Spenti</small></div><button type="button" data-action="toggle">ACCENDI</button></div>
 <div class="device" data-device="stairs"><div><strong>Lampioncino scale</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Spento</small></div><button type="button" data-action="toggle">ACCENDI</button></div>
+</div>
+<div class="card account-card">
+<div class="account-heading"><div><h2>Il mio account</h2><p class="muted" id="familyAccountInfo">Sessione familiare attiva</p></div><span class="pill ok">FAMILIARE</span></div>
+<button id="familyLogoutBtn" class="secondary account-logout" type="button">DISCONNETTI</button>
 </div>
 </section>
 <footer>CASA SANTINI · AMBIENTE PREVIEW</footer>
