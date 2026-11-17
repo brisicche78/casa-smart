@@ -95,6 +95,30 @@ footer{font-size:9px;color:#60758e;letter-spacing:1.4px;margin-top:18px}
  .account-logout{width:100%;min-width:0}
 }
 
+
+/* Rifinitura grafica: icone SVG, cancello in evidenza e luci in schede distinte */
+.devices-panel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.devices-panel>div:first-child,.devices-panel>[data-read-status]{grid-column:1/-1}
+.devices-panel>.device[data-device]{margin:0;padding:16px 14px;border:1px solid rgba(125,170,210,.16);border-radius:17px;background:rgba(5,15,27,.48);min-width:0}
+.devices-panel>.gate-device{grid-column:1/-1;background:linear-gradient(110deg,rgba(14,87,125,.22),rgba(5,15,27,.62));border-color:rgba(56,189,248,.28)!important;padding:19px 18px!important}
+.device-icon{width:52px;height:52px;border-radius:16px}
+.device-icon svg{width:29px;height:29px;display:block}
+.gate-device .device-icon{width:60px;height:60px;background:rgba(56,189,248,.15);border-color:rgba(56,189,248,.34);color:#7dd3fc}
+.gate-device strong{font-size:16px!important}
+.gate-device button{min-width:158px!important;min-height:48px!important;background:linear-gradient(105deg,#087cae,#2563eb)!important;border:1px solid rgba(125,211,252,.35)!important;color:#fff!important}
+.light-device{align-content:start}
+.light-device .device-icon{width:46px;height:46px}
+.light-device button{grid-column:1/-1!important;width:100%!important;margin-top:5px!important}
+.devices-panel>[data-read-status]{margin:0 0 2px;padding:0 2px}
+.devices-panel .device-state{font-size:11px!important}
+@media(max-width:520px){
+ .devices-panel{grid-template-columns:1fr;gap:9px}
+ .devices-panel>.gate-device{grid-column:1}
+ .devices-panel>.light-device{grid-template-columns:44px minmax(0,1fr);align-items:center}
+ .devices-panel>.light-device button{grid-column:2!important;width:100%!important}
+ .gate-device .device-icon{width:50px;height:50px}
+}
+
 </style>
 </head>
 <body>
