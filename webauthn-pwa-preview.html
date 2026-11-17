@@ -99,6 +99,7 @@ footer{font-size:9px;color:#60758e;letter-spacing:1.4px;margin-top:18px}
 /* Rifinitura grafica: icone SVG, cancello in evidenza e luci in schede distinte */
 .devices-panel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .devices-panel>div:first-child,.devices-panel>[data-read-status]{grid-column:1/-1}
+.devices-panel>div:has(>h2){grid-column:1/-1}
 .devices-panel>.device[data-device]{margin:0;padding:16px 14px;border:1px solid rgba(125,170,210,.16);border-radius:17px;background:rgba(5,15,27,.48);min-width:0}
 .devices-panel>.gate-device{grid-column:1/-1;background:linear-gradient(110deg,rgba(14,87,125,.22),rgba(5,15,27,.62));border-color:rgba(56,189,248,.28)!important;padding:19px 18px!important}
 .device-icon{width:52px;height:52px;border-radius:16px}
