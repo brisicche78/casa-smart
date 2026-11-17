@@ -1,294 +1,250 @@
 <!doctype html>
 <html lang="it">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#090f1c">
-  <meta name="description" content="Comandi rapidi per i dispositivi Shelly di casa">
-  <link rel="manifest" href="./manifest.webmanifest">
-  <title>Casa Smart</title>
-  <style>
-:root{color-scheme:dark;--bg:#050914;--panel:#0c1425;--panel2:#111f35;--muted:#8396b5;--line:#203452;--cyan:#54e7ff;--blue:#4d8dff;--green:#48f0bd;--red:#ff668c;--amber:#ffd36a}
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -12%,#19365d 0%,#0b1427 35%,#050914 74%);color:#eef7ff;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;background-image:linear-gradient(#54749a22 1px,transparent 1px),linear-gradient(90deg,#54749a22 1px,transparent 1px);background-size:38px 38px;mask-image:linear-gradient(to bottom,black,transparent 75%)}
-main{position:relative;width:min(100% - 30px,520px);margin:0 auto;padding:30px 0 calc(38px + env(safe-area-inset-bottom))}
-.brand{display:flex;align-items:center;gap:13px;min-width:0}
-.brandmark{width:48px;height:48px;flex:0 0 48px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(145deg,#102f4d,#0b1b30);border:1px solid #28658a;box-shadow:inset 0 0 20px #29d9ff19,0 0 26px #087eb52b;color:var(--cyan)}
-.brandmark svg{width:29px;height:29px}
-h1{font-size:24px;letter-spacing:2px;margin:0;font-weight:850}.sub{font-size:10px;color:#7f9bbd;margin-top:5px;letter-spacing:2px;text-transform:uppercase}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:7px 2px 34px}.header-actions{display:flex;align-items:center;gap:8px}.admin-open{padding:9px 11px;background:#12243a;border:1px solid #2b4968;color:#bfeaff;font-size:9px;letter-spacing:.5px;white-space:nowrap}.back-btn{padding:10px 13px;background:#12243a;border:1px solid #2b4968;color:#c8e4ff;font-size:10px;margin:0 0 14px}
-.connection{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #25405d;border-radius:30px;background:#0a1525d9;color:#a9c0da;font-size:10px;letter-spacing:.7px;white-space:nowrap;text-transform:uppercase}
-.dot{width:7px;height:7px;border-radius:50%;background:#718096;box-shadow:0 0 0 3px #71809622}.dot.ok{background:var(--green);box-shadow:0 0 10px #48f0bd,0 0 0 4px #48f0bd20}.dot.bad{background:var(--red);box-shadow:0 0 0 3px #ff668c22}
-.intro{display:flex;align-items:center;gap:10px;font-size:10px;color:#7894b5;letter-spacing:2.3px;text-transform:uppercase;font-weight:800;margin:0 4px 14px}.intro:before{content:"";width:19px;height:1px;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
-.card{position:relative;overflow:hidden;background:linear-gradient(145deg,#101e33f5,#091323f7);border:1px solid #203955;border-radius:24px;padding:20px;margin:13px 0;box-shadow:0 16px 42px #0005,inset 0 1px #ffffff08}
-.card:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 0% 0%,#38cfff0c,transparent 58%)}
-.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.device{display:flex;align-items:center;gap:15px;min-width:0}
-.device-icon{position:relative;width:62px;height:62px;flex:0 0 62px;border-radius:19px;display:grid;place-items:center;background:linear-gradient(145deg,#142d49,#0a192c);border:1px solid #2a5273;color:#75dfff;box-shadow:inset 0 0 20px #35caff10,0 0 18px #1688c314}
-.device-icon svg{width:39px;height:39px;overflow:visible;filter:drop-shadow(0 0 5px currentColor)}
-h2{font-size:16px;margin:0 0 6px;font-weight:750;letter-spacing:.1px}.hint{font-size:11px;color:#8399b5;letter-spacing:.15px}
-.state{display:flex;align-items:center;gap:8px;font-size:10px;color:#8298b5;margin:17px 0 0 77px;letter-spacing:1px;text-transform:uppercase}
-.state:before{content:"";width:6px;height:6px;border-radius:50%;background:#62748d}
-.state.active{color:#8fffd7}.state.active:before{background:var(--green);box-shadow:0 0 9px var(--green)}
-button{font:inherit;border:0;cursor:pointer;border-radius:14px;font-weight:800;transition:transform .15s,filter .15s,opacity .15s,box-shadow .2s}
-button:active{transform:scale(.97)}button:disabled{opacity:.42;cursor:wait}
-.toggle{min-width:105px;padding:12px 14px;background:#14243a;border:1px solid #2b4563;color:#c3d8ee;font-size:10px;letter-spacing:1px}
-.toggle.on{background:linear-gradient(135deg,#075a54,#0b3d43);border-color:#22b99c;color:#aaffea;box-shadow:0 0 20px #13d8b328,inset 0 0 15px #13d8b314}
-.card:has(.toggle.on) .device-icon{color:#8dffe0;border-color:#278b80;box-shadow:inset 0 0 22px #28e4c52a,0 0 22px #16c8ad2a}
-.gate-card{background:linear-gradient(140deg,#112b48,#0a172a);border-color:#285477}
-.gate-card:after{content:"GATE CONTROL / 01";position:absolute;right:18px;top:17px;color:#54799b;font-size:8px;letter-spacing:1.4px;font-weight:800}
-.gate-card .device-icon{background:linear-gradient(145deg,#12456a,#10233c);border-color:#2c80a9;color:#71eaff;box-shadow:0 0 25px #19b9e51a,inset 0 0 18px #25c9ff19}
-.gate{width:100%;padding:16px 18px;margin-top:18px;background:linear-gradient(100deg,#087cae,#2468d5 65%,#4b70f4);color:#fff;font-size:12px;letter-spacing:1.5px;box-shadow:0 8px 26px #126bc54d,inset 0 1px #ffffff35}
-.gate:active{filter:brightness(1.18)}
-.tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 2px 0}
-.updated{font-size:10px;color:#7085a1;line-height:1.5;max-width:65%}
-.refresh{padding:11px 15px;border-radius:12px;background:#101f34;border:1px solid #29425e;color:#b9d3ed;font-size:10px;letter-spacing:.8px}
-footer{text-align:center;color:#536b88;font-size:9px;margin-top:28px;letter-spacing:2px}
-.login{max-width:420px;margin:12vh auto;padding:25px}.login .brand{margin-bottom:25px}.field{width:100%;padding:15px;border:1px solid #29425e;border-radius:13px;background:#081323;color:white;font:inherit;margin:17px 0 12px;outline:none}.field:focus{border-color:#4acff0;box-shadow:0 0 0 3px #579be522}
-.primary{width:100%;padding:15px;background:linear-gradient(100deg,#087cae,#426ff0);color:white;letter-spacing:1px}.error{color:#ff9eaf;font-size:12px;min-height:20px;margin-top:10px}
-.hidden{display:none!important}
-@media(max-width:390px){main{width:min(100% - 22px,520px);padding-top:21px}header{margin-bottom:27px}.brandmark{width:43px;height:43px;flex-basis:43px}h1{font-size:20px}.connection{padding:8px 9px;font-size:9px}.card{padding:16px}.device-icon{width:54px;height:54px;flex-basis:54px}.device-icon svg{width:34px;height:34px}.device{gap:12px}.state{margin-left:66px}.toggle{min-width:88px;padding:11px 9px}}
-@media(prefers-reduced-motion:no-preference){.card{animation:rise .5s ease both}.card:nth-of-type(2){animation-delay:.07s}.card:nth-of-type(3){animation-delay:.14s}@keyframes rise{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta http-equiv="Cache-Control" content="no-store">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#090f1c">
+<title>Casa Santini</title>
+<style>
+:root{color-scheme:dark;--bg:#050914;--panel:#0c1425;--line:#203452;--muted:#91a5c2;--cyan:#54e7ff;--green:#48f0bd;--red:#ff668c;--amber:#ffd36a;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -12%,#19365d 0%,#0b1427 38%,#050914 76%);color:#eef7ff}
+main{width:min(100% - 28px,520px);margin:0 auto;padding:28px 0 calc(36px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;gap:13px;margin:6px 2px 26px}.mark{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:#102b45;border:1px solid #28658a;color:var(--cyan);font-size:24px}
+h1{font-size:21px;letter-spacing:1.5px;margin:0}.sub{font-size:10px;color:#91a5c2;letter-spacing:1.5px;text-transform:uppercase;margin-top:5px}
+.card{background:linear-gradient(145deg,#101e33f5,#091323f7);border:1px solid #203955;border-radius:21px;padding:20px;margin:13px 0;box-shadow:0 16px 42px #0005}
+h2{font-size:16px;margin:0 0 8px}.muted{font-size:12px;color:var(--muted);line-height:1.6}
+button{width:100%;padding:14px;border:0;border-radius:13px;font:inherit;font-size:12px;font-weight:800;letter-spacing:.7px;cursor:pointer;margin-top:12px;background:linear-gradient(100deg,#087cae,#426ff0);color:white}
+button.secondary{background:#14243a;border:1px solid #2b4968;color:#c8e4ff}button:disabled{opacity:.5;cursor:wait}input{width:100%;margin:8px 0 2px;padding:14px;border:1px solid #2b4968;border-radius:12px;background:#081323;color:#eef7ff;font:inherit;font-size:13px}.family-row{padding:12px 0;border-top:1px solid var(--line)}.family-row strong{display:block;font-size:13px}.family-row small{display:block;color:var(--muted);font-size:10px;margin-top:4px}.family-actions{display:flex;gap:8px}.family-actions button{flex:1;padding:10px 6px;font-size:10px}
+#status{min-height:54px;padding:12px;border-radius:12px;background:#081323;color:#c8d7ef;font-size:12px;line-height:1.6;white-space:pre-wrap;margin-top:15px}
+.banner{border:1px solid #75603b;background:#30251655;color:#ffe0a0;padding:12px;border-radius:12px;font-size:11px;line-height:1.55;margin:14px 0}
+.pill{display:inline-block;padding:5px 9px;border-radius:20px;background:#26334a;color:#b8c9df;font-size:9px;letter-spacing:.7px;text-transform:uppercase}
+.pill.ok{background:#123d36;color:#8fffd7}.device{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px solid var(--line)}.device:first-of-type{border-top:0}.device strong{font-size:13px}.device small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+.device button{width:auto;min-width:112px;margin:0;padding:9px 12px;background:#14243a;border:1px solid #2b4563;color:#c8e4ff}.device button:disabled{opacity:.6}.device-state{display:block}
+.hidden{display:none!important}footer{text-align:center;color:#637995;font-size:9px;letter-spacing:1.5px;margin-top:24px}
 
-/* Family / MASTER panel */
-.secondary{width:100%;padding:13px;background:#12243a;border:1px solid #2b4968;color:#c8e4ff;letter-spacing:.7px;margin-top:9px}
-.admin-card{padding:18px}.admin-card h2{margin:0;font-size:15px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.panel-head button{padding:8px 10px;background:#14243a;border:1px solid #2b4563;color:#b9d3ed;font-size:10px}
-.admin-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #203452}
-.admin-row:first-child{border-top:0}.admin-name{font-size:13px;font-weight:750}.admin-meta{font-size:10px;color:#8399b5;margin-top:5px}
-.admin-actions{display:flex;gap:7px;flex-shrink:0}.small-btn{padding:9px 11px;border-radius:10px;background:#123c3a;border:1px solid #237a70;color:#9dffe2;font-size:10px}
-.small-btn.reject{background:#351927;border-color:#754055;color:#ffb5c5}.small-btn.revoke{background:#302516;border-color:#75603b;color:#ffe0a0}
-.status-pill{display:inline-block;padding:4px 7px;border-radius:20px;background:#26334a;color:#b8c9df;font-size:9px;text-transform:uppercase;letter-spacing:.5px}
-.status-pill.pending{background:#463819;color:#ffe09a}.status-pill.active{background:#123d36;color:#8fffd7}.status-pill.rejected,.status-pill.revoked{background:#401f30;color:#ff9db5}
-.empty{font-size:12px;color:#8399b5;padding:10px 0}.note{font-size:11px;color:#8399b5;line-height:1.55;margin:10px 0 0}
-.logout{padding:10px 13px;background:#172338;border:1px solid #30445f;color:#c6d7eb;font-size:10px;letter-spacing:.7px}
-@media(max-width:390px){.admin-row{align-items:flex-start}.admin-actions{flex-direction:column}}
+/* Casa Santini · nuova interfaccia Preview */
+:root{--bg:#07111e;--panel:#0d1b2a;--accent:#38bdf8;--line:rgba(125,170,210,.16)}
+body{background-color:#07111e;background-image:radial-gradient(circle at 18% 12%,rgba(56,189,248,.09),transparent 42%),radial-gradient(circle at 82% 85%,rgba(16,185,129,.05),transparent 42%),linear-gradient(180deg,#07111e 0%,#050c16 100%)}
+main{width:min(100% - 32px,920px);padding-top:24px}
+header{margin-bottom:20px}
+.card{background:rgba(13,27,42,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(56,189,248,.14);border-top-color:rgba(255,255,255,.12);border-radius:22px;box-shadow:0 12px 32px -10px rgba(0,0,0,.58);padding:20px}
+#dashboard,#familyHome{display:grid;grid-template-columns:1fr;gap:16px}
+#dashboard>.card:first-child,#familyHome>.card:first-child{padding:16px 20px}
+#dashboard>.card:has(.device[data-device]),#familyHome>.card:has(.device[data-device]){padding:22px}
+#dashboard>.card:has(.device[data-device]) h2,#familyHome>.card:has(.device[data-device]) h2{font-size:17px;letter-spacing:.07em;text-transform:uppercase}
+.device[data-device]{position:relative;display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:14px;padding:17px 0;border-top:1px solid var(--line);min-height:94px;transition:background .2s,border-color .2s}
+.device[data-device] .device-copy{min-width:0}
+.device[data-device] .device-state::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;background:#64748b;vertical-align:middle}
+.device[data-state="online"] .device-state::before{background:#34d399;box-shadow:0 0 8px rgba(52,211,153,.65)}
+.device[data-state="on"] .device-state::before{background:#f59e0b;box-shadow:0 0 8px rgba(245,158,11,.65)}
+.device[data-state="offline"] .device-state::before{background:#fb7185;box-shadow:0 0 8px rgba(251,113,133,.55)}
+.device[data-device] strong{font-size:14px;font-weight:650;letter-spacing:.01em}
+.device[data-device] small{font-size:11px;line-height:1.5;margin-top:6px}
+.device-icon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:rgba(56,189,248,.09);border:1px solid rgba(56,189,248,.2);color:#7dd3fc;font-size:23px;flex-shrink:0}
+.device[data-state="on"] .device-icon{background:rgba(245,158,11,.16);border-color:rgba(245,158,11,.4);color:#fbbf24;box-shadow:0 5px 22px rgba(245,158,11,.08)}
+.device[data-state="offline"] .device-icon{background:rgba(244,63,94,.08);border-color:rgba(244,63,94,.22);color:#fb7185}
+.device[data-state="on"]{background:linear-gradient(90deg,rgba(245,158,11,.045),transparent 75%)}
+.device[data-state="offline"]{opacity:.72}
+.device[data-device] button{min-width:118px;min-height:44px;padding:10px 15px;border-radius:12px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.28);color:#bae6fd;font-size:11px;font-weight:800;letter-spacing:.055em;transition:background .18s,transform .18s}
+.device[data-device] button:hover:not(:disabled){background:rgba(56,189,248,.22);transform:translateY(-1px)}
+.device[data-state="on"] button{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.35);color:#fde68a}
+.device[data-device] button:disabled{opacity:.38;cursor:not-allowed;transform:none}
+.device-led{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:7px;background:#64748b;vertical-align:middle}
+.device[data-state="online"] .device-led{background:#34d399;box-shadow:0 0 8px rgba(52,211,153,.65)}
+.device[data-state="on"] .device-led{background:#f59e0b;box-shadow:0 0 8px rgba(245,158,11,.65)}
+.device[data-state="offline"] .device-led{background:#fb7185;box-shadow:0 0 8px rgba(251,113,133,.55)}
+#dashboard .banner,#familyHome .banner{display:none}
+#dashboard>.card:has(#familyAdmin){padding:18px 20px}
+#familyAdmin .device{min-height:60px}
+#familyAdmin .family-row{padding:14px 0;border-top:1px solid var(--line)}
+#familyAdmin .family-row strong{font-size:13px}
+#familyAdmin .family-actions button{min-height:38px;margin-top:8px}
+#status{background:rgba(4,12,23,.7);border:1px solid var(--line)}
+button{min-height:44px}
+button:focus-visible,input:focus-visible{outline:2px solid #38bdf8;outline-offset:3px}
+footer{font-size:9px;color:#60758e;letter-spacing:1.4px;margin-top:18px}
+@media(min-width:760px){
+ #dashboard{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}
+ #dashboard>.card:first-child{grid-column:1/-1}
+ #dashboard>.card:has(.device[data-device]){grid-column:1/-1}
+ #dashboard>.card:has(#familyAdmin){grid-column:1/-1}
+ #familyHome{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+ main{width:min(100% - 24px,920px);padding-top:16px}
+ .card{padding:16px;border-radius:19px}
+ .device[data-device]{grid-template-columns:44px minmax(0,1fr);gap:11px;padding:15px 0}
+ .device-icon{width:42px;height:42px;border-radius:13px;font-size:20px}
+ .device[data-device] button{grid-column:2;justify-self:stretch;width:100%;margin-top:1px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+
+/* Account/logout in fondo alla schermata */
+#dashboard,#familyHome{display:flex;flex-direction:column;gap:16px}
+#dashboard>.account-card,#familyHome>.account-card{order:99;padding:17px 20px;margin-top:2px;background:rgba(9,20,33,.72);border-color:rgba(125,170,210,.13);box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.account-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.account-heading h2{margin:0;font-size:14px;letter-spacing:.02em;text-transform:none}
+.account-heading .muted{margin:4px 0 0;font-size:11px}
+.account-logout{width:auto;min-width:190px;margin-top:14px;padding:11px 18px}
+@media(max-width:480px){
+ #dashboard>.account-card,#familyHome>.account-card{padding:15px}
+ .account-logout{width:100%;min-width:0}
+}
+
+
+/* Rifinitura grafica: icone SVG, cancello in evidenza e luci in schede distinte */
+.devices-panel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.devices-panel>div:first-child,.devices-panel>[data-read-status]{grid-column:1/-1}
+.devices-panel>div:has(>h2){grid-column:1/-1}
+.devices-panel>.device[data-device]{margin:0;padding:16px 14px;border:1px solid rgba(125,170,210,.16);border-radius:17px;background:rgba(5,15,27,.48);min-width:0}
+.devices-panel>.gate-device{grid-column:1/-1;background:linear-gradient(110deg,rgba(14,87,125,.22),rgba(5,15,27,.62));border-color:rgba(56,189,248,.28)!important;padding:19px 18px!important}
+.device-icon{width:52px;height:52px;border-radius:16px}
+.device-icon svg{width:29px;height:29px;display:block}
+.gate-device .device-icon{width:60px;height:60px;background:rgba(56,189,248,.15);border-color:rgba(56,189,248,.34);color:#7dd3fc}
+.gate-device strong{font-size:16px!important}
+.gate-device button{min-width:158px!important;min-height:48px!important;background:linear-gradient(105deg,#087cae,#2563eb)!important;border:1px solid rgba(125,211,252,.35)!important;color:#fff!important}
+.light-device{align-content:start}
+.light-device .device-icon{width:46px;height:46px}
+.light-device button{grid-column:1/-1!important;width:100%!important;margin-top:5px!important}
+.devices-panel>[data-read-status]{margin:0 0 2px;padding:0 2px}
+.devices-panel .device-state{font-size:11px!important}
+@media(max-width:520px){
+ .devices-panel{grid-template-columns:1fr;gap:9px}
+ .devices-panel>.gate-device{grid-column:1}
+ .devices-panel>.light-device{grid-template-columns:44px minmax(0,1fr);align-items:center}
+ .devices-panel>.light-device button{grid-column:2!important;width:100%!important}
+ .gate-device .device-icon{width:50px;height:50px}
+}
 
 </style>
 </head>
-
 <body>
 <main>
-  <section id="loginView" class="login card">
-    <div class="brand"><div class="brandmark"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M5 18.5 20 6l15 12.5V34H5V18.5Z" stroke="currentColor" stroke-width="1.8"/><path d="M14 34V22h12v12M11 17l9-7.5 9 7.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 14v4m-2-2h4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><h1>CASA SANTINI</h1><p class="sub">Smart home interface</p></div></div>
-    <div id="loginModeMaster">
-      <form id="loginForm">
-        <input id="password" class="field" type="password" placeholder="Password MASTER" autocomplete="current-password" required>
-        <button class="primary" type="submit">ACCEDI AL SISTEMA</button>
-        <div id="loginError" class="error"></div>
-      </form>
-    </div>
-    <div id="loginModeFamily" class="hidden">
-      <form id="familyForm">
-        <input id="familyName" class="field" type="text" maxlength="50" placeholder="Il tuo nome" autocomplete="name" required>
-        <input id="familyPassword" class="field" type="password" placeholder="Password famiglia" autocomplete="off" required>
-        <button class="primary" type="submit">INVIA RICHIESTA</button>
-        <div id="familyMessage" class="error"></div>
-      </form>
-      <p class="note">La richiesta dovrà essere approvata dal MASTER. In questa fase non viene ancora attivato l'accesso ai dispositivi.</p>
-    </div>
-    <button id="switchLoginMode" class="secondary" type="button">Sono un familiare · Richiedi accesso</button>
-  </section>
-  <section id="appView" class="hidden">
-    <header>
-      <div class="brand"><div class="brandmark"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M5 18.5 20 6l15 12.5V34H5V18.5Z" stroke="currentColor" stroke-width="1.8"/><path d="M14 34V22h12v12M11 17l9-7.5 9 7.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 14v4m-2-2h4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><h1>CASA SANTINI</h1><div id="userLabel" class="sub">Smart home interface</div></div></div>
-      <div class="header-actions"><button id="adminOpen" class="admin-open hidden" type="button">UTENTI</button><button id="logoutBtn" class="logout" type="button">DISCONNETTI</button><div class="connection"><span id="cloudDot" class="dot"></span><span id="cloudText">Connessione…</span></div></div>
-    </header>
-    <section id="dashboardView">
-    <p class="intro">Controllo ambiente</p>
-    <article class="card gate-card">
-      <div class="row"><div class="device"><div class="device-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 40V11h34v29M5 40h38M11 15h26M13 18v19m7-19v19m8-19v19m7-19v19"/><path d="M7 11 12 7h29l-5 4M24 7V4m-3 3h6"/><path d="M16 42h16" opacity=".5"/></svg></div><div><h2>Cancello</h2><div class="hint">Accesso automatico · impulso</div></div></div></div>
-      <button id="gateBtn" class="gate">⌁ &nbsp; APRI CANCELLO</button>
-      <div class="state" id="gateState">In attesa</div>
-    </article>
-    <article class="card">
-      <div class="row"><div class="device"><div class="device-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 8h30l-4 8H13L9 8Z"/><path d="M15 18 10 34m11-16-2 16m8-16 2 16m4-16 5 16" opacity=".8"/><path d="M7 39h34M16 4V2m8 2V1m8 3V2" opacity=".65"/><circle cx="24" cy="12" r="2" fill="currentColor" stroke="none"/></svg></div><div><h2>Faretti piazzale</h2><div class="hint">Illuminazione esterna</div></div></div><button id="yardBtn" class="toggle" disabled>…</button></div>
-      <div class="state" id="yardState">Stato non ancora letto</div>
-    </article>
-    <article class="card">
-      <div class="row"><div class="device"><div class="device-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 39V8h5v31M9 13h20a8 8 0 0 1 8 8v3H14"/><path d="M31 24v-3a5 5 0 0 0-5-5H14"/><path d="M29 25h11l-3 8H26l3-8Z" fill="#ffd36a" fill-opacity=".13"/><path d="m31 35-2 4m7-4 2 4m-9-13-4-3m17 3 3-3" opacity=".75"/><path d="M6 42h9" opacity=".55"/></svg></div><div><h2>Lampioncino scale</h2><div class="hint">Luce area ingresso</div></div></div><button id="stairsBtn" class="toggle" disabled>…</button></div>
-      <div class="state" id="stairsState">Stato non ancora letto</div>
-    </article>
-    <div class="tools"><div class="updated" id="updated">In attesa del primo aggiornamento</div><button id="refreshBtn" class="refresh">↻ &nbsp; AGGIORNA</button></div>
-    <footer>CASA SANTINI &nbsp;·&nbsp; SECURE SHELLY LINK</footer>
-    </section>
-    <section id="adminView" class="hidden">
-      <button id="adminBack" class="back-btn" type="button">← TORNA AI DISPOSITIVI</button>
-      <div id="masterAdmin" class="hidden">
-      <p class="intro">Gestione famiglia · MASTER</p>
-      <article class="card admin-card">
-        <div class="panel-head"><h2>Richieste in attesa</h2><button id="reloadRequests" type="button">↻ AGGIORNA</button></div>
-        <div id="requestsList"><div class="empty">Caricamento richieste…</div></div>
-        <div id="requestsMessage" class="note"></div>
-      </article>
-      <article class="card admin-card">
-        <div class="panel-head"><h2>Utenti autorizzati</h2><button id="reloadUsers" type="button">↻ AGGIORNA</button></div>
-        <div id="usersList"><div class="empty">Caricamento utenti…</div></div>
-        <div id="usersMessage" class="note"></div>
-      </article>
-    </div>
-    </section>
-  </section>
+<header><div class="mark">⌂</div><div><h1>CASA SANTINI</h1><div class="sub">Gestione domotica</div></div></header>
+<section id="login" class="card">
+<h2>Accesso con Passkey</h2>
+<p class="muted">Accedi con la Passkey MASTER registrata. Puoi usare Windows Hello, PIN, impronta o il metodo supportato dal tuo dispositivo.</p>
+<button id="loginBtn" type="button">ACCEDI CON PASSKEY</button>
+<div id="status" role="status" aria-live="polite">Controllo della sessione in corso…</div>
+<div class="banner"><strong>ACCESSO FAMILIARE</strong><br>Ogni familiare può registrare la propria Passkey. L'accesso sarà attivato solo dopo la tua approvazione MASTER.</div>
+<div class="card" id="familyAccess">
+<h2>Familiari</h2>
+<label class="muted" for="familyName">Nome e cognome</label>
+<input id="familyName" type="text" maxlength="50" autocomplete="name" placeholder="Es. Mario Rossi">
+<button id="familyRegisterBtn" type="button">RICHIEDI ACCESSO CON PASSKEY</button>
+<button id="familyLoginBtn" class="secondary" type="button">ACCEDI COME FAMILIARE</button>
+<div id="familyStatus" class="muted" role="status" aria-live="polite" style="margin-top:12px;white-space:pre-wrap">La richiesta viene inviata al MASTER per l'approvazione.</div>
+</div></section>
+<section id="dashboard" class="hidden">
+<div class="card">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><h2>Accesso MASTER attivo</h2><div class="muted" id="userInfo">Sessione verificata</div></div><span class="pill ok">Autenticato</span></div>
+<p class="muted" id="expiryInfo">Sessione rinnovata durante l'utilizzo.</p>
+</div>
+
+<div class="card">
+<h2>Dispositivi Casa Santini</h2>
+<div class="device" data-device="gate"><div><strong>Cancello</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Pronto</small></div><button type="button" data-action="pulse">SIMULA APERTURA</button></div>
+<div class="device" data-device="yard"><div><strong>Faretti piazzale</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Spenti</small></div><button type="button" data-action="toggle">ACCENDI</button></div>
+<div class="device" data-device="stairs"><div><strong>Lampioncino scale</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Spento</small></div><button type="button" data-action="toggle">ACCENDI</button></div>
+</div>
+<div class="card" id="familyAdmin">
+<h2>Gestione familiari</h2><p class="muted">Approva le richieste oppure revoca un accesso già autorizzato.</p>
+<div class="device"><div><strong>Richieste in attesa</strong><small id="requestCount">—</small></div><button id="refreshFamilyBtn" type="button">AGGIORNA</button></div>
+<div id="familyRequests" class="muted">Caricamento…</div>
+<div class="device"><div><strong>Familiari autorizzati</strong><small id="userCount">—</small></div></div>
+<div id="familyUsers" class="muted">Caricamento…</div><div id="familyAdminStatus" class="muted" role="status" style="margin-top:12px;white-space:pre-wrap"></div>
+</div>
+<div class="card account-card">
+<div class="account-heading"><div><h2>Il mio account</h2><p class="muted">Sessione MASTER attiva</p></div><span class="pill ok">MASTER</span></div>
+<button id="logoutBtn" class="secondary account-logout" type="button">DISCONNETTI · REVOCA SESSIONE</button>
+</div>
+
+</section>
+<section class="hidden" id="familyHome">
+<div class="card">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><h2>Casa Santini</h2><div class="muted" id="familyWelcome">Sessione verificata.</div></div><span class="pill ok">Familiare</span></div>
+</div>
+
+<div class="card">
+<h2>Dispositivi Casa Santini</h2>
+<div class="device" data-device="gate"><div><strong>Cancello</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Pronto</small></div><button type="button" data-action="pulse">SIMULA APERTURA</button></div>
+<div class="device" data-device="yard"><div><strong>Faretti piazzale</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Spenti</small></div><button type="button" data-action="toggle">ACCENDI</button></div>
+<div class="device" data-device="stairs"><div><strong>Lampioncino scale</strong><small class="device-state" aria-live="polite">SIMULAZIONE · Spento</small></div><button type="button" data-action="toggle">ACCENDI</button></div>
+</div>
+<div class="card account-card">
+<div class="account-heading"><div><h2>Il mio account</h2><p class="muted" id="familyAccountInfo">Sessione familiare attiva</p></div><span class="pill ok">FAMILIARE</span></div>
+<button id="familyLogoutBtn" class="secondary account-logout" type="button">DISCONNETTI</button>
+</div>
+</section>
+<footer>CASA SANTINI</footer>
 </main>
 <script>
-const API = "https://casa-smart-api.brisicche78.workers.dev";
-const IDS = { gate:"441793cd4e78", stairs:"a8032abb2468", yard:"ccba97d87ba0" };
-let token = sessionStorage.getItem("casaSmartToken") || "";
-let busy = false;
-const $ = id => document.getElementById(id);
-function showApp(){ $("loginView").classList.toggle("hidden",!!token); $("appView").classList.toggle("hidden",!token); }
-async function api(path,body,authenticated=true){
-  const headers={"Content-Type":"application/json"};if(authenticated&&token)headers.Authorization="Bearer "+token;
-  const res=await fetch(API+path,{method:"POST",headers,body:JSON.stringify(body||{})});
-  const data=await res.json().catch(()=>({error:"Risposta non valida dal server"}));
-  if(!res.ok)throw new Error(data.error||"Errore HTTP "+res.status);return data;
+(() => {
+"use strict";
+const API="https://casa-smart-api-webauthn-preview.brisicche78.workers.dev";
+const $=id=>document.getElementById(id);
+let token="",heartbeat=null,busy=false;
+function message(value){$("status").textContent=value}
+function decodeBase64url(value){const padded=value.replace(/-/g,"+").replace(/_/g,"/")+"=".repeat((4-value.length%4)%4);const binary=atob(padded);const bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return bytes.buffer}
+function encodeBase64url(buffer){const bytes=new Uint8Array(buffer);let binary="";for(let i=0;i<bytes.length;i++)binary+=String.fromCharCode(bytes[i]);return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"")}
+function openStore(){return new Promise((resolve,reject)=>{const request=indexedDB.open("casa-santini-auth-preview",1);request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains("session"))request.result.createObjectStore("session")};request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
+async function saveToken(value){const db=await openStore();await new Promise((resolve,reject)=>{const tx=db.transaction("session","readwrite");tx.objectStore("session").put(value,"master-token");tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()}
+async function readToken(){const db=await openStore();const value=await new Promise((resolve,reject)=>{const tx=db.transaction("session","readonly");const req=tx.objectStore("session").get("master-token");req.onsuccess=()=>resolve(req.result||"");req.onerror=()=>reject(req.error)});db.close();return value}
+async function clearToken(){const db=await openStore();await new Promise((resolve,reject)=>{const tx=db.transaction("session","readwrite");tx.objectStore("session").delete("master-token");tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close();token=""}
+async function request(path,{method="POST",body=null,bearer=""}={}){const headers={};if(body!==null)headers["Content-Type"]="application/json";if(bearer)headers.Authorization="Bearer "+bearer;const response=await fetch(API+path,{method,headers,body:body===null?undefined:JSON.stringify(body),cache:"no-store",credentials:"omit",referrerPolicy:"no-referrer"});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||("Errore HTTP "+response.status));return data}
+async function verifySession(value){const data=await request("/webauthn/master/session",{method:"GET",bearer:value});if(!data.authenticated||data.role!=="master")throw new Error("Sessione MASTER non valida.");return data}
+function showAuthenticated(data){$("login").classList.add("hidden");$("dashboard").classList.remove("hidden");$("userInfo").textContent=(data.user||"MASTER")+" · Sessione verificata dal server";$("expiryInfo").textContent="Durata mobile: 30 giorni dall'ultima verifica valida. La sessione viene rinnovata durante l'utilizzo."}
+function showLogin(text){$("dashboard").classList.add("hidden");$("login").classList.remove("hidden");if(text)message(text)}
+async function login(){
+if(busy)return;busy=true;$("loginBtn").disabled=true;
+try{
+if(!window.isSecureContext||!navigator.credentials?.get)throw new Error("Passkey non supportata da questo browser o contesto.");
+message("Contatto il Worker Preview…");
+const prepared=await request("/webauthn/master/authenticate/options");
+if(!prepared.challengeId||!prepared.options)throw new Error("Risposta di autenticazione incompleta.");
+const options=prepared.options;options.challenge=decodeBase64url(options.challenge);
+if(Array.isArray(options.allowCredentials))options.allowCredentials=options.allowCredentials.map(item=>({...item,id:decodeBase64url(item.id)}));
+message("Conferma l'accesso con Windows Hello o con la Passkey…");
+const credential=await navigator.credentials.get({publicKey:options});if(!credential)throw new Error("Autenticazione annullata.");
+const a=credential.response;
+const response={id:credential.id,rawId:encodeBase64url(credential.rawId),type:credential.type,response:{authenticatorData:encodeBase64url(a.authenticatorData),clientDataJSON:encodeBase64url(a.clientDataJSON),signature:encodeBase64url(a.signature),userHandle:a.userHandle?encodeBase64url(a.userHandle):null},clientExtensionResults:credential.getClientExtensionResults(),authenticatorAttachment:credential.authenticatorAttachment||null};
+message("Firma ricevuta. Verifica in corso sul server…");
+const verified=await request("/webauthn/master/authenticate/verify",{body:{challengeId:prepared.challengeId,response}});
+if(!verified.verified||verified.role!=="master"||!verified.sessionToken)throw new Error("Il server non ha confermato l'accesso MASTER.");
+await verifySession(verified.sessionToken);await saveToken(verified.sessionToken);token=verified.sessionToken;
+showAuthenticated({user:verified.user});startHeartbeat();message("Accesso Passkey riuscito. Sessione salvata in IndexedDB e confermata dal server Preview.");
+}catch(error){message("Accesso non completato: "+(error.message||"errore sconosciuto"));}finally{busy=false;$("loginBtn").disabled=false}
 }
-let currentUser = null;
-let loginMode = "master";
-function setLoginMode(mode){
-  loginMode=mode;
-  $("loginModeMaster").classList.toggle("hidden",mode!=="master");
-  $("loginModeFamily").classList.toggle("hidden",mode!=="family");
-  $("switchLoginMode").textContent=mode==="master"?"Sono un familiare · Richiedi accesso":"Torna all'accesso MASTER";
+async function renew(){
+if(!token)return;
+try{const data=await verifySession(token);showAuthenticated(data)}catch(error){await clearToken();stopHeartbeat();showLogin("Sessione scaduta o revocata. Accedi nuovamente con la Passkey.")}
 }
-function setSession(result){
-  token=result.token;
-  currentUser=result.user||null;
-  sessionStorage.setItem("casaSmartToken",token);
-  if(currentUser)sessionStorage.setItem("casaSmartUser",JSON.stringify(currentUser));
-  $("userLabel").textContent=currentUser?(currentUser.name+" · "+String(currentUser.role||"utente").toUpperCase()):"Smart home interface";
-  const isMaster=!!currentUser&&currentUser.role==="master";
-  $("adminOpen").classList.toggle("hidden",!isMaster);
-  $("masterAdmin").classList.toggle("hidden",!isMaster);
-  $("adminView").classList.add("hidden");$("dashboardView").classList.remove("hidden");
-  showApp();
+function startHeartbeat(){stopHeartbeat();heartbeat=setInterval(()=>{if(document.visibilityState==="visible")renew()},10*60*1000)}
+function stopHeartbeat(){if(heartbeat){clearInterval(heartbeat);heartbeat=null}}
+async function logout(){
+if(!token||busy)return;busy=true;$("logoutBtn").disabled=true;
+try{
+const result=await request("/webauthn/master/logout",{bearer:token});
+if(!result.ok||!result.revoked)throw new Error("Il server non ha confermato la revoca.");
+let stillValid=true;try{await verifySession(token)}catch{stillValid=false}
+if(stillValid)throw new Error("La sessione risulta ancora valida dopo la revoca.");
+await clearToken();stopHeartbeat();showLogin("Logout riuscito. Sessione revocata dal server Preview; il token non è più valido.");
+}catch(error){$("expiryInfo").textContent="Logout non verificato: "+(error.message||"errore");}finally{busy=false;$("logoutBtn").disabled=false}
 }
-function clearSession(){
-  token="";currentUser=null;
-  sessionStorage.removeItem("casaSmartToken");sessionStorage.removeItem("casaSmartUser");
-  $("adminOpen").classList.add("hidden");$("masterAdmin").classList.add("hidden");$("adminView").classList.add("hidden");$("dashboardView").classList.remove("hidden");showApp();
-}
-$("switchLoginMode").addEventListener("click",()=>setLoginMode(loginMode==="master"?"family":"master"));
-$("logoutBtn").addEventListener("click",()=>{clearSession();$("password").value="";$("familyPassword").value="";$("loginError").textContent="";$("familyMessage").textContent="";setLoginMode("master");});
-
-$("loginForm").addEventListener("submit",async e=>{
-  e.preventDefault();$("loginError").textContent="Accesso in corso…";
-  try{
-    const r=await api("/login",{password:$("password").value},false);
-    $("password").value="";$("loginError").textContent="";
-    setSession(r);
-    await refresh();
-    if(currentUser&&currentUser.role==="master")await loadAdmin();
-  }catch(err){$("loginError").textContent=err.message;}
-});
-$("familyForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  const name=$("familyName").value.trim(),password=$("familyPassword").value;
-  $("familyMessage").className="error";$("familyMessage").textContent="Invio richiesta…";
-  try{
-    const r=await api("/family/request",{name,password},false);
-    $("familyMessage").className="success";
-    $("familyMessage").textContent=r.message||"Richiesta inviata. Attendi l'approvazione del MASTER.";
-    $("familyForm").reset();
-  }catch(err){$("familyMessage").textContent=err.message;}
-});
-
-function normalizeList(data,keys){
-  if(Array.isArray(data))return data;
-  for(const key of keys)if(Array.isArray(data?.[key]))return data[key];
-  return [];
-}
-function safeText(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function statusClass(status){return ["pending","active","rejected","revoked"].includes(status)?status:"";}
-function statusLabel(status){return ({pending:"In attesa",active:"Attivo",rejected:"Rifiutato",revoked:"Revocato"})[status]||status||"—";}
-async function loadRequests(){
-  $("requestsList").innerHTML='<div class="empty">Caricamento…</div>';$("requestsMessage").textContent="";
-  try{
-    const data=await api("/admin/requests",{});
-    const list=normalizeList(data,["requests","users","pending"]);
-    if(!list.length){$("requestsList").innerHTML='<div class="empty">Nessuna richiesta in attesa.</div>';return;}
-    $("requestsList").innerHTML=list.map(u=>{
-      const id=u.id||u.userId||u.user_id;
-      return '<div class="admin-row"><div><div class="admin-name">'+safeText(u.name||"Utente")+'</div><div class="admin-meta">Richiesta · '+safeText(u.created_at||u.createdAt||"")+'</div></div><div class="admin-actions"><button class="small-btn" data-action="approve" data-id="'+safeText(id)+'">APPROVA</button><button class="small-btn reject" data-action="reject" data-id="'+safeText(id)+'">RIFIUTA</button></div></div>';
-    }).join("");
-  }catch(err){$("requestsList").innerHTML='<div class="empty">Impossibile caricare le richieste.</div>';$("requestsMessage").textContent=err.message;}
-}
-async function loadUsers(){
-  $("usersList").innerHTML='<div class="empty">Caricamento…</div>';$("usersMessage").textContent="";
-  try{
-    const data=await api("/admin/users",{});
-    const list=normalizeList(data,["users","members","items"]);
-    if(!list.length){$("usersList").innerHTML='<div class="empty">Nessun utente restituito dal server.</div>';return;}
-    $("usersList").innerHTML=list.map(u=>{
-      const id=u.id||u.userId||u.user_id,status=u.status||"active",role=u.role||"member";
-      const canRevoke=role!=="master"&&status==="active";
-      return '<div class="admin-row"><div><div class="admin-name">'+safeText(u.name||"Utente")+(role==="master"?' <span class="status-pill">MASTER</span>':"")+'</div><div class="admin-meta"><span class="status-pill '+statusClass(status)+'">'+safeText(statusLabel(status))+'</span></div></div>'+(canRevoke?'<div class="admin-actions"><button class="small-btn revoke" data-action="revoke" data-id="'+safeText(id)+'">REVOCA</button></div>':"")+'</div>';
-    }).join("");
-  }catch(err){$("usersList").innerHTML='<div class="empty">Impossibile caricare gli utenti.</div>';$("usersMessage").textContent=err.message;}
-}
-async function loadAdmin(){await Promise.all([loadRequests(),loadUsers()]);}
-async function adminAction(action,userId){
-  if(!userId)return;
-  const labels={approve:"Confermi l'approvazione di questo familiare?",reject:"Vuoi rifiutare questa richiesta?",revoke:"Vuoi revocare l'accesso a questo utente?"};
-  if(!confirm(labels[action]||"Confermi l'operazione?"))return;
-  const endpoint={approve:"/admin/approve",reject:"/admin/reject",revoke:"/admin/revoke"}[action];
-  try{
-    await api(endpoint,{userId});
-    $("requestsMessage").textContent="Operazione completata.";
-    await loadAdmin();
-  }catch(err){$("requestsMessage").textContent="Operazione non riuscita: "+err.message;}
-}
-$("requestsList").addEventListener("click",e=>{const b=e.target.closest("button[data-action]");if(b)adminAction(b.dataset.action,b.dataset.id);});
-$("usersList").addEventListener("click",e=>{const b=e.target.closest("button[data-action]");if(b)adminAction(b.dataset.action,b.dataset.id);});
-$("adminOpen").addEventListener("click",()=>{$("dashboardView").classList.add("hidden");$("adminView").classList.remove("hidden");loadAdmin();});
-$("adminBack").addEventListener("click",()=>{$("adminView").classList.add("hidden");$("dashboardView").classList.remove("hidden");});
-$("reloadRequests").addEventListener("click",loadRequests);
-$("reloadUsers").addEventListener("click",loadUsers);
-
-function outputOf(device){
-  const s=device.status||{};const sw=s["switch:0"]||s.switch||s;
-  if(typeof sw.output==="boolean")return sw.output;if(typeof sw.on==="boolean")return sw.on;if(typeof s.output==="boolean")return s.output;return null;
-}
-function setToggle(id,on,online){
-  const btn=$(id+"Btn"),label=$(id+"State");btn.disabled=!online;btn.textContent=on?"SPEGNI":"ACCENDI";btn.classList.toggle("on",!!on);
-  label.textContent=online?(on?"Acceso":"Spento"):"Non raggiungibile";label.classList.toggle("active",online&&!!on);
-}
-async function refresh(){
-  if(busy)return;busy=true;$("refreshBtn").disabled=true;
-  try{
-    const data=await api("/status",{});const devices=Array.isArray(data)?data:(data.devices||data.data||[]);const byId=Object.fromEntries(devices.map(d=>[d.id,d]));
-    const yard=byId[IDS.yard],stairs=byId[IDS.stairs],gate=byId[IDS.gate];const online=d=>!!d&&(d.online===1||d.online===true);
-    setToggle("yard",yard?outputOf(yard):false,online(yard));setToggle("stairs",stairs?outputOf(stairs):false,online(stairs));
-    $("gateState").textContent=online(gate)?"Dispositivo online":"Dispositivo non raggiungibile";$("gateState").classList.toggle("active",online(gate));
-    $("cloudDot").className="dot ok";$("cloudText").textContent="Connesso";
-    $("updated").textContent="Aggiornato alle "+new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-  }catch(err){
-    $("cloudDot").className="dot bad";$("cloudText").textContent="Non connesso";$("updated").textContent=err.message;
-    if(/Sessione scaduta|non valida/i.test(err.message)){token="";sessionStorage.removeItem("casaSmartToken");showApp();}
-  }finally{busy=false;$("refreshBtn").disabled=false;}
-}
-async function command(id,on,pulse=false){
-  if(busy)return;busy=true;["gateBtn","yardBtn","stairsBtn","refreshBtn"].forEach(x=>$(x).disabled=true);
-  try{await api("/switch",{id,on,pulse});$("gateState").textContent=pulse?"Impulso inviato":"Comando inviato";await new Promise(r=>setTimeout(r,1300));}
-  catch(err){$("updated").textContent=err.message;}
-  finally{busy=false;["gateBtn","yardBtn","stairsBtn","refreshBtn"].forEach(x=>$(x).disabled=false);}
-  if(token)await refresh();
-}
-$("gateBtn").addEventListener("click",()=>command(IDS.gate,true,true));
-$("yardBtn").addEventListener("click",()=>command(IDS.yard,!$("yardBtn").classList.contains("on")));
-$("stairsBtn").addEventListener("click",()=>command(IDS.stairs,!$("stairsBtn").classList.contains("on")));
-$("refreshBtn").addEventListener("click",refresh);
-try{currentUser=JSON.parse(sessionStorage.getItem("casaSmartUser")||"null");}catch{currentUser=null;}
-if(currentUser){
-  $("userLabel").textContent=currentUser.name+" · "+String(currentUser.role||"utente").toUpperCase();
-  const isMaster=currentUser.role==="master";
-  $("adminOpen").classList.toggle("hidden",!isMaster);
-  $("masterAdmin").classList.toggle("hidden",!isMaster);
-}
-showApp();setLoginMode("master");
-if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
-if(token){showApp();refresh().then(()=>{if(token&&currentUser&&currentUser.role==="master")loadAdmin();});}
+$("loginBtn").addEventListener("click",login);$("logoutBtn").addEventListener("click",logout);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&token)renew()});
+(async()=>{
+try{token=await readToken();if(!token){showLogin("Nessuna sessione salvata. Accedi con la Passkey MASTER.");return}const data=await verifySession(token);showAuthenticated(data);startHeartbeat();message("Sessione precedente ripristinata e verificata dal server Preview.");}
+catch(error){try{await clearToken()}catch{}showLogin("Sessione non valida o scaduta. Accedi nuovamente con la Passkey.")}
+})();
+})();
 </script>
+<script src="./family-preview.js"></script>
+<script src="./preview-devices.js"></script>
 </body>
 </html>
