@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090f1c">
+  <meta name="description" content="Comandi rapidi per i dispositivi Shelly di casa">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <title>Casa Smart</title>
+  <style>
+:root{color-scheme:dark;--bg:#050914;--panel:#0c1425;--panel2:#111f35;--muted:#8396b5;--line:#203452;--cyan:#54e7ff;--blue:#4d8dff;--green:#48f0bd;--red:#ff668c;--amber:#ffd36a}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -12%,#19365d 0%,#0b1427 35%,#050914 74%);color:#eef7ff;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;background-image:linear-gradient(#54749a22 1px,transparent 1px),linear-gradient(90deg,#54749a22 1px,transparent 1px);background-size:38px 38px;mask-image:linear-gradient(to bottom,black,transparent 75%)}
+main{position:relative;width:min(100% - 30px,520px);margin:0 auto;padding:30px 0 calc(38px + env(safe-area-inset-bottom))}
+.brand{display:flex;align-items:center;gap:13px;min-width:0}
+.brandmark{width:48px;height:48px;flex:0 0 48px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(145deg,#102f4d,#0b1b30);border:1px solid #28658a;box-shadow:inset 0 0 20px #29d9ff19,0 0 26px #087eb52b;color:var(--cyan)}
+.brandmark svg{width:29px;height:29px}
+h1{font-size:24px;letter-spacing:2px;margin:0;font-weight:850}.sub{font-size:10px;color:#7f9bbd;margin-top:5px;letter-spacing:2px;text-transform:uppercase}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:7px 2px 34px}.header-actions{display:flex;align-items:center;gap:8px}.admin-open{padding:9px 11px;background:#12243a;border:1px solid #2b4968;color:#bfeaff;font-size:9px;letter-spacing:.5px;white-space:nowrap}.back-btn{padding:10px 13px;background:#12243a;border:1px solid #2b4968;color:#c8e4ff;font-size:10px;margin:0 0 14px}
+.connection{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #25405d;border-radius:30px;background:#0a1525d9;color:#a9c0da;font-size:10px;letter-spacing:.7px;white-space:nowrap;text-transform:uppercase}
+.dot{width:7px;height:7px;border-radius:50%;background:#718096;box-shadow:0 0 0 3px #71809622}.dot.ok{background:var(--green);box-shadow:0 0 10px #48f0bd,0 0 0 4px #48f0bd20}.dot.bad{background:var(--red);box-shadow:0 0 0 3px #ff668c22}
+.intro{display:flex;align-items:center;gap:10px;font-size:10px;color:#7894b5;letter-spacing:2.3px;text-transform:uppercase;font-weight:800;margin:0 4px 14px}.intro:before{content:"";width:19px;height:1px;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.card{position:relative;overflow:hidden;background:linear-gradient(145deg,#101e33f5,#091323f7);border:1px solid #203955;border-radius:24px;padding:20px;margin:13px 0;box-shadow:0 16px 42px #0005,inset 0 1px #ffffff08}
+.card:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 0% 0%,#38cfff0c,transparent 58%)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.device{display:flex;align-items:center;gap:15px;min-width:0}
+.device-icon{position:relative;width:62px;height:62px;flex:0 0 62px;border-radius:19px;display:grid;place-items:center;background:linear-gradient(145deg,#142d49,#0a192c);border:1px solid #2a5273;color:#75dfff;box-shadow:inset 0 0 20px #35caff10,0 0 18px #1688c314}
+.device-icon svg{width:39px;height:39px;overflow:visible;filter:drop-shadow(0 0 5px currentColor)}
+h2{font-size:16px;margin:0 0 6px;font-weight:750;letter-spacing:.1px}.hint{font-size:11px;color:#8399b5;letter-spacing:.15px}
+.state{display:flex;align-items:center;gap:8px;font-size:10px;color:#8298b5;margin:17px 0 0 77px;letter-spacing:1px;text-transform:uppercase}
+.state:before{content:"";width:6px;height:6px;border-radius:50%;background:#62748d}
+.state.active{color:#8fffd7}.state.active:before{background:var(--green);box-shadow:0 0 9px var(--green)}
+button{font:inherit;border:0;cursor:pointer;border-radius:14px;font-weight:800;transition:transform .15s,filter .15s,opacity .15s,box-shadow .2s}
+button:active{transform:scale(.97)}button:disabled{opacity:.42;cursor:wait}
+.toggle{min-width:105px;padding:12px 14px;background:#14243a;border:1px solid #2b4563;color:#c3d8ee;font-size:10px;letter-spacing:1px}
+.toggle.on{background:linear-gradient(135deg,#075a54,#0b3d43);border-color:#22b99c;color:#aaffea;box-shadow:0 0 20px #13d8b328,inset 0 0 15px #13d8b314}
+.card:has(.toggle.on) .device-icon{color:#8dffe0;border-color:#278b80;box-shadow:inset 0 0 22px #28e4c52a,0 0 22px #16c8ad2a}
+.gate-card{background:linear-gradient(140deg,#112b48,#0a172a);border-color:#285477}
+.gate-card:after{content:"GATE CONTROL / 01";position:absolute;right:18px;top:17px;color:#54799b;font-size:8px;letter-spacing:1.4px;font-weight:800}
+.gate-card .device-icon{background:linear-gradient(145deg,#12456a,#10233c);border-color:#2c80a9;color:#71eaff;box-shadow:0 0 25px #19b9e51a,inset 0 0 18px #25c9ff19}
+.gate{width:100%;padding:16px 18px;margin-top:18px;background:linear-gradient(100deg,#087cae,#2468d5 65%,#4b70f4);color:#fff;font-size:12px;letter-spacing:1.5px;box-shadow:0 8px 26px #126bc54d,inset 0 1px #ffffff35}
+.gate:active{filter:brightness(1.18)}
+.tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 2px 0}
+.updated{font-size:10px;color:#7085a1;line-height:1.5;max-width:65%}
+.refresh{padding:11px 15px;border-radius:12px;background:#101f34;border:1px solid #29425e;color:#b9d3ed;font-size:10px;letter-spacing:.8px}
+footer{text-align:center;color:#536b88;font-size:9px;margin-top:28px;letter-spacing:2px}
+.login{max-width:420px;margin:12vh auto;padding:25px}.login .brand{margin-bottom:25px}.field{width:100%;padding:15px;border:1px solid #29425e;border-radius:13px;background:#081323;color:white;font:inherit;margin:17px 0 12px;outline:none}.field:focus{border-color:#4acff0;box-shadow:0 0 0 3px #579be522}
+.primary{width:100%;padding:15px;background:linear-gradient(100deg,#087cae,#426ff0);color:white;letter-spacing:1px}.error{color:#ff9eaf;font-size:12px;min-height:20px;margin-top:10px}
+.hidden{display:none!important}
+@media(max-width:390px){main{width:min(100% - 22px,520px);padding-top:21px}header{margin-bottom:27px}.brandmark{width:43px;height:43px;flex-basis:43px}h1{font-size:20px}.connection{padding:8px 9px;font-size:9px}.card{padding:16px}.device-icon{width:54px;height:54px;flex-basis:54px}.device-icon svg{width:34px;height:34px}.device{gap:12px}.state{margin-left:66px}.toggle{min-width:88px;padding:11px 9px}}
+@media(prefers-reduced-motion:no-preference){.card{animation:rise .5s ease both}.card:nth-of-type(2){animation-delay:.07s}.card:nth-of-type(3){animation-delay:.14s}@keyframes rise{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}}
+
+/* Family / MASTER panel */
+.secondary{width:100%;padding:13px;background:#12243a;border:1px solid #2b4968;color:#c8e4ff;letter-spacing:.7px;margin-top:9px}
+.admin-card{padding:18px}.admin-card h2{margin:0;font-size:15px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.panel-head button{padding:8px 10px;background:#14243a;border:1px solid #2b4563;color:#b9d3ed;font-size:10px}
+.admin-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #203452}
+.admin-row:first-child{border-top:0}.admin-name{font-size:13px;font-weight:750}.admin-meta{font-size:10px;color:#8399b5;margin-top:5px}
+.admin-actions{display:flex;gap:7px;flex-shrink:0}.small-btn{padding:9px 11px;border-radius:10px;background:#123c3a;border:1px solid #237a70;color:#9dffe2;font-size:10px}
+.small-btn.reject{background:#351927;border-color:#754055;color:#ffb5c5}.small-btn.revoke{background:#302516;border-color:#75603b;color:#ffe0a0}
+.status-pill{display:inline-block;padding:4px 7px;border-radius:20px;background:#26334a;color:#b8c9df;font-size:9px;text-transform:uppercase;letter-spacing:.5px}
+.status-pill.pending{background:#463819;color:#ffe09a}.status-pill.active{background:#123d36;color:#8fffd7}.status-pill.rejected,.status-pill.revoked{background:#401f30;color:#ff9db5}
+.empty{font-size:12px;color:#8399b5;padding:10px 0}.note{font-size:11px;color:#8399b5;line-height:1.55;margin:10px 0 0}
+.logout{padding:10px 13px;background:#172338;border:1px solid #30445f;color:#c6d7eb;font-size:10px;letter-spacing:.7px}
+@media(max-width:390px){.admin-row{align-items:flex-start}.admin-actions{flex-direction:column}}
+
+</style>
+</head>
+
+<body>
+<main>
+  <section id="loginView" class="login card">
+    <div class="brand"><div class="brandmark"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M5 18.5 20 6l15 12.5V34H5V18.5Z" stroke="currentColor" stroke-width="1.8"/><path d="M14 34V22h12v12M11 17l9-7.5 9 7.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 14v4m-2-2h4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><h1>CASA SANTINI</h1><p class="sub">Smart home interface</p></div></div>
+    <div id="loginModeMaster">
+      <form id="loginForm">
+        <input id="password" class="field" type="password" placeholder="Password MASTER" autocomplete="current-password" required>
+        <button class="primary" type="submit">ACCEDI AL SISTEMA</button>
+        <div id="loginError" class="error"></div>
+      </form>
+    </div>
+    <div id="loginModeFamily" class="hidden">
+      <form id="familyForm">
+        <input id="familyName" class="field" type="text" maxlength="50" placeholder="Il tuo nome" autocomplete="name" required>
+        <input id="familyPassword" class="field" type="password" placeholder="Password famiglia" autocomplete="off" required>
+        <button class="primary" type="submit">INVIA RICHIESTA</button>
+        <div id="familyMessage" class="error"></div>
+      </form>
+      <p class="note">La richiesta dovrà essere approvata dal MASTER. In questa fase non viene ancora attivato l'accesso ai dispositivi.</p>
+    </div>
+    <button id="switchLoginMode" class="secondary" type="button">Sono un familiare · Richiedi accesso</button>
+  </section>
+  <section id="appView" class="hidden">
+    <header>
+      <div class="brand"><div class="brandmark"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M5 18.5 20 6l15 12.5V34H5V18.5Z" stroke="currentColor" stroke-width="1.8"/><path d="M14 34V22h12v12M11 17l9-7.5 9 7.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 14v4m-2-2h4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><h1>CASA SANTINI</h1><div id="userLabel" class="sub">Smart home interface</div></div></div>
+      <div class="header-actions"><button id="adminOpen" class="admin-open hidden" type="button">UTENTI</button><button id="logoutBtn" class="logout" type="button">DISCONNETTI</button><div class="connection"><span id="cloudDot" class="dot"></span><span id="cloudText">Connessione…</span></div></div>
+    </header>
+    <section id="dashboardView">
+    <p class="intro">Controllo ambiente</p>
+    <article class="card gate-card">
+      <div class="row"><div class="device"><div class="device-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 40V11h34v29M5 40h38M11 15h26M13 18v19m7-19v19m8-19v19m7-19v19"/><path d="M7 11 12 7h29l-5 4M24 7V4m-3 3h6"/><path d="M16 42h16" opacity=".5"/></svg></div><div><h2>Cancello</h2><div class="hint">Accesso automatico · impulso</div></div></div></div>
+      <button id="gateBtn" class="gate">⌁ &nbsp; APRI CANCELLO</button>
+      <div class="state" id="gateState">In attesa</div>
+    </article>
+    <article class="card">
+      <div class="row"><div class="device"><div class="device-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 8h30l-4 8H13L9 8Z"/><path d="M15 18 10 34m11-16-2 16m8-16 2 16m4-16 5 16" opacity=".8"/><path d="M7 39h34M16 4V2m8 2V1m8 3V2" opacity=".65"/><circle cx="24" cy="12" r="2" fill="currentColor" stroke="none"/></svg></div><div><h2>Faretti piazzale</h2><div class="hint">Illuminazione esterna</div></div></div><button id="yardBtn" class="toggle" disabled>…</button></div>
+      <div class="state" id="yardState">Stato non ancora letto</div>
+    </article>
+    <article class="card">
+      <div class="row"><div class="device"><div class="device-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 39V8h5v31M9 13h20a8 8 0 0 1 8 8v3H14"/><path d="M31 24v-3a5 5 0 0 0-5-5H14"/><path d="M29 25h11l-3 8H26l3-8Z" fill="#ffd36a" fill-opacity=".13"/><path d="m31 35-2 4m7-4 2 4m-9-13-4-3m17 3 3-3" opacity=".75"/><path d="M6 42h9" opacity=".55"/></svg></div><div><h2>Lampioncino scale</h2><div class="hint">Luce area ingresso</div></div></div><button id="stairsBtn" class="toggle" disabled>…</button></div>
+      <div class="state" id="stairsState">Stato non ancora letto</div>
+    </article>
+    <div class="tools"><div class="updated" id="updated">In attesa del primo aggiornamento</div><button id="refreshBtn" class="refresh">↻ &nbsp; AGGIORNA</button></div>
+    <footer>CASA SANTINI &nbsp;·&nbsp; SECURE SHELLY LINK</footer>
+    </section>
+    <section id="adminView" class="hidden">
+      <button id="adminBack" class="back-btn" type="button">← TORNA AI DISPOSITIVI</button>
+      <div id="masterAdmin" class="hidden">
+      <p class="intro">Gestione famiglia · MASTER</p>
+      <article class="card admin-card">
+        <div class="panel-head"><h2>Richieste in attesa</h2><button id="reloadRequests" type="button">↻ AGGIORNA</button></div>
+        <div id="requestsList"><div class="empty">Caricamento richieste…</div></div>
+        <div id="requestsMessage" class="note"></div>
+      </article>
+      <article class="card admin-card">
+        <div class="panel-head"><h2>Utenti autorizzati</h2><button id="reloadUsers" type="button">↻ AGGIORNA</button></div>
+        <div id="usersList"><div class="empty">Caricamento utenti…</div></div>
+        <div id="usersMessage" class="note"></div>
+      </article>
+    </div>
+    </section>
+  </section>
+</main>
+<script>
+const API = "https://casa-smart-api.brisicche78.workers.dev";
+const IDS = { gate:"441793cd4e78", stairs:"a8032abb2468", yard:"ccba97d87ba0" };
+let token = sessionStorage.getItem("casaSmartToken") || "";
+let busy = false;
+const $ = id => document.getElementById(id);
+function showApp(){ $("loginView").classList.toggle("hidden",!!token); $("appView").classList.toggle("hidden",!token); }
+async function api(path,body,authenticated=true){
+  const headers={"Content-Type":"application/json"};if(authenticated&&token)headers.Authorization="Bearer "+token;
+  const res=await fetch(API+path,{method:"POST",headers,body:JSON.stringify(body||{})});
+  const data=await res.json().catch(()=>({error:"Risposta non valida dal server"}));
+  if(!res.ok)throw new Error(data.error||"Errore HTTP "+res.status);return data;
+}
+let currentUser = null;
+let loginMode = "master";
+function setLoginMode(mode){
+  loginMode=mode;
+  $("loginModeMaster").classList.toggle("hidden",mode!=="master");
+  $("loginModeFamily").classList.toggle("hidden",mode!=="family");
+  $("switchLoginMode").textContent=mode==="master"?"Sono un familiare · Richiedi accesso":"Torna all'accesso MASTER";
+}
+function setSession(result){
+  token=result.token;
+  currentUser=result.user||null;
+  sessionStorage.setItem("casaSmartToken",token);
+  if(currentUser)sessionStorage.setItem("casaSmartUser",JSON.stringify(currentUser));
+  $("userLabel").textContent=currentUser?(currentUser.name+" · "+String(currentUser.role||"utente").toUpperCase()):"Smart home interface";
+  const isMaster=!!currentUser&&currentUser.role==="master";
+  $("adminOpen").classList.toggle("hidden",!isMaster);
+  $("masterAdmin").classList.toggle("hidden",!isMaster);
+  $("adminView").classList.add("hidden");$("dashboardView").classList.remove("hidden");
+  showApp();
+}
+function clearSession(){
+  token="";currentUser=null;
+  sessionStorage.removeItem("casaSmartToken");sessionStorage.removeItem("casaSmartUser");
+  $("adminOpen").classList.add("hidden");$("masterAdmin").classList.add("hidden");$("adminView").classList.add("hidden");$("dashboardView").classList.remove("hidden");showApp();
+}
+$("switchLoginMode").addEventListener("click",()=>setLoginMode(loginMode==="master"?"family":"master"));
+$("logoutBtn").addEventListener("click",()=>{clearSession();$("password").value="";$("familyPassword").value="";$("loginError").textContent="";$("familyMessage").textContent="";setLoginMode("master");});
+
+$("loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();$("loginError").textContent="Accesso in corso…";
+  try{
+    const r=await api("/login",{password:$("password").value},false);
+    $("password").value="";$("loginError").textContent="";
+    setSession(r);
+    await refresh();
+    if(currentUser&&currentUser.role==="master")await loadAdmin();
+  }catch(err){$("loginError").textContent=err.message;}
+});
+$("familyForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const name=$("familyName").value.trim(),password=$("familyPassword").value;
+  $("familyMessage").className="error";$("familyMessage").textContent="Invio richiesta…";
+  try{
+    const r=await api("/family/request",{name,password},false);
+    $("familyMessage").className="success";
+    $("familyMessage").textContent=r.message||"Richiesta inviata. Attendi l'approvazione del MASTER.";
+    $("familyForm").reset();
+  }catch(err){$("familyMessage").textContent=err.message;}
+});
+
+function normalizeList(data,keys){
+  if(Array.isArray(data))return data;
+  for(const key of keys)if(Array.isArray(data?.[key]))return data[key];
+  return [];
+}
+function safeText(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function statusClass(status){return ["pending","active","rejected","revoked"].includes(status)?status:"";}
+function statusLabel(status){return ({pending:"In attesa",active:"Attivo",rejected:"Rifiutato",revoked:"Revocato"})[status]||status||"—";}
+async function loadRequests(){
+  $("requestsList").innerHTML='<div class="empty">Caricamento…</div>';$("requestsMessage").textContent="";
+  try{
+    const data=await api("/admin/requests",{});
+    const list=normalizeList(data,["requests","users","pending"]);
+    if(!list.length){$("requestsList").innerHTML='<div class="empty">Nessuna richiesta in attesa.</div>';return;}
+    $("requestsList").innerHTML=list.map(u=>{
+      const id=u.id||u.userId||u.user_id;
+      return '<div class="admin-row"><div><div class="admin-name">'+safeText(u.name||"Utente")+'</div><div class="admin-meta">Richiesta · '+safeText(u.created_at||u.createdAt||"")+'</div></div><div class="admin-actions"><button class="small-btn" data-action="approve" data-id="'+safeText(id)+'">APPROVA</button><button class="small-btn reject" data-action="reject" data-id="'+safeText(id)+'">RIFIUTA</button></div></div>';
+    }).join("");
+  }catch(err){$("requestsList").innerHTML='<div class="empty">Impossibile caricare le richieste.</div>';$("requestsMessage").textContent=err.message;}
+}
+async function loadUsers(){
+  $("usersList").innerHTML='<div class="empty">Caricamento…</div>';$("usersMessage").textContent="";
+  try{
+    const data=await api("/admin/users",{});
+    const list=normalizeList(data,["users","members","items"]);
+    if(!list.length){$("usersList").innerHTML='<div class="empty">Nessun utente restituito dal server.</div>';return;}
+    $("usersList").innerHTML=list.map(u=>{
+      const id=u.id||u.userId||u.user_id,status=u.status||"active",role=u.role||"member";
+      const canRevoke=role!=="master"&&status==="active";
+      return '<div class="admin-row"><div><div class="admin-name">'+safeText(u.name||"Utente")+(role==="master"?' <span class="status-pill">MASTER</span>':"")+'</div><div class="admin-meta"><span class="status-pill '+statusClass(status)+'">'+safeText(statusLabel(status))+'</span></div></div>'+(canRevoke?'<div class="admin-actions"><button class="small-btn revoke" data-action="revoke" data-id="'+safeText(id)+'">REVOCA</button></div>':"")+'</div>';
+    }).join("");
+  }catch(err){$("usersList").innerHTML='<div class="empty">Impossibile caricare gli utenti.</div>';$("usersMessage").textContent=err.message;}
+}
+async function loadAdmin(){await Promise.all([loadRequests(),loadUsers()]);}
+async function adminAction(action,userId){
+  if(!userId)return;
+  const labels={approve:"Confermi l'approvazione di questo familiare?",reject:"Vuoi rifiutare questa richiesta?",revoke:"Vuoi revocare l'accesso a questo utente?"};
+  if(!confirm(labels[action]||"Confermi l'operazione?"))return;
+  const endpoint={approve:"/admin/approve",reject:"/admin/reject",revoke:"/admin/revoke"}[action];
+  try{
+    await api(endpoint,{userId});
+    $("requestsMessage").textContent="Operazione completata.";
+    await loadAdmin();
+  }catch(err){$("requestsMessage").textContent="Operazione non riuscita: "+err.message;}
+}
+$("requestsList").addEventListener("click",e=>{const b=e.target.closest("button[data-action]");if(b)adminAction(b.dataset.action,b.dataset.id);});
+$("usersList").addEventListener("click",e=>{const b=e.target.closest("button[data-action]");if(b)adminAction(b.dataset.action,b.dataset.id);});
+$("adminOpen").addEventListener("click",()=>{$("dashboardView").classList.add("hidden");$("adminView").classList.remove("hidden");loadAdmin();});
+$("adminBack").addEventListener("click",()=>{$("adminView").classList.add("hidden");$("dashboardView").classList.remove("hidden");});
+$("reloadRequests").addEventListener("click",loadRequests);
+$("reloadUsers").addEventListener("click",loadUsers);
+
+function outputOf(device){
+  const s=device.status||{};const sw=s["switch:0"]||s.switch||s;
+  if(typeof sw.output==="boolean")return sw.output;if(typeof sw.on==="boolean")return sw.on;if(typeof s.output==="boolean")return s.output;return null;
+}
+function setToggle(id,on,online){
+  const btn=$(id+"Btn"),label=$(id+"State");btn.disabled=!online;btn.textContent=on?"SPEGNI":"ACCENDI";btn.classList.toggle("on",!!on);
+  label.textContent=online?(on?"Acceso":"Spento"):"Non raggiungibile";label.classList.toggle("active",online&&!!on);
+}
+async function refresh(){
+  if(busy)return;busy=true;$("refreshBtn").disabled=true;
+  try{
+    const data=await api("/status",{});const devices=Array.isArray(data)?data:(data.devices||data.data||[]);const byId=Object.fromEntries(devices.map(d=>[d.id,d]));
+    const yard=byId[IDS.yard],stairs=byId[IDS.stairs],gate=byId[IDS.gate];const online=d=>!!d&&(d.online===1||d.online===true);
+    setToggle("yard",yard?outputOf(yard):false,online(yard));setToggle("stairs",stairs?outputOf(stairs):false,online(stairs));
+    $("gateState").textContent=online(gate)?"Dispositivo online":"Dispositivo non raggiungibile";$("gateState").classList.toggle("active",online(gate));
+    $("cloudDot").className="dot ok";$("cloudText").textContent="Connesso";
+    $("updated").textContent="Aggiornato alle "+new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  }catch(err){
+    $("cloudDot").className="dot bad";$("cloudText").textContent="Non connesso";$("updated").textContent=err.message;
+    if(/Sessione scaduta|non valida/i.test(err.message)){token="";sessionStorage.removeItem("casaSmartToken");showApp();}
+  }finally{busy=false;$("refreshBtn").disabled=false;}
+}
+async function command(id,on,pulse=false){
+  if(busy)return;busy=true;["gateBtn","yardBtn","stairsBtn","refreshBtn"].forEach(x=>$(x).disabled=true);
+  try{await api("/switch",{id,on,pulse});$("gateState").textContent=pulse?"Impulso inviato":"Comando inviato";await new Promise(r=>setTimeout(r,1300));}
+  catch(err){$("updated").textContent=err.message;}
+  finally{busy=false;["gateBtn","yardBtn","stairsBtn","refreshBtn"].forEach(x=>$(x).disabled=false);}
+  if(token)await refresh();
+}
+$("gateBtn").addEventListener("click",()=>command(IDS.gate,true,true));
+$("yardBtn").addEventListener("click",()=>command(IDS.yard,!$("yardBtn").classList.contains("on")));
+$("stairsBtn").addEventListener("click",()=>command(IDS.stairs,!$("stairsBtn").classList.contains("on")));
+$("refreshBtn").addEventListener("click",refresh);
+try{currentUser=JSON.parse(sessionStorage.getItem("casaSmartUser")||"null");}catch{currentUser=null;}
+if(currentUser){
+  $("userLabel").textContent=currentUser.name+" · "+String(currentUser.role||"utente").toUpperCase();
+  const isMaster=currentUser.role==="master";
+  $("adminOpen").classList.toggle("hidden",!isMaster);
+  $("masterAdmin").classList.toggle("hidden",!isMaster);
+}
+showApp();setLoginMode("master");
+if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
+if(token){showApp();refresh().then(()=>{if(token&&currentUser&&currentUser.role==="master")loadAdmin();});}
+</script>
+</body>
+</html>
